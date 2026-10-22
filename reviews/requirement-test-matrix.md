@@ -1,8 +1,10 @@
-# Requirement ↔ test matrix — grok-cli
+# Requirement ↔ test matrix — AgentCli
 
-**Updated:** 2026-10-12 (1.8.47 shell startup files: `.zprofile` PATH; missing `.profile` / `.zshenv` / `.zprofile`)  
-**Product VERSION:** 1.8.47
-**Suite:** `tests/run.sh`
+**Updated:** 2026-10-22. Python ship unit **1.2.0**. Suite `tests/run_python.sh` (60 tests OK). POSIX reference suite remains `tests/run.sh` against `src/grok-cli` **1.8.47**.  
+**Rust ship unit (2026-10-22):** `requirement-rust-tui`, `requirement-rust-cli-interface`, `requirement-rust-cli-language`, `requirement-rust-about`, `requirement-rust-readme`, `requirement-rust-packaging`, `requirement-domain-grok-cli`, `requirement-grok-auth-backup`, `requirement-grok-setup`, `requirement-grok-crontab`, `requirement-shell-startup-files` → `tests/contract.rs`, `tests/domain.rs`, `tests/startup.rs`, `tests/docs.rs`. Product proof is `cargo test --offline -- --test-threads=1`. Python unit tests are removed with `src/AgentCli`. `tests/run.sh` remains the POSIX reference against `src/grok-cli`.
+
+**Product VERSION (shell reference):** 1.8.47  
+**Shell suite:** `tests/run.sh`
 
 | Requirement key | Area | TP families | Coverage notes |
 |-----------------|------|-------------|----------------|

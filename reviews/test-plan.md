@@ -1,6 +1,40 @@
-# Test plan — grok-cli
+# Test plan — RustAgent
 
 Maps **TP-*** coverage to `tests/`.  
+**Product proof:** `cargo test --offline -- --test-threads=1`  
+**Ship unit:** crate `rustagent` **1.2.0**, console `rust-agent`  
+**POSIX reference suite:** `./tests/run.sh` against `src/grok-cli` (grok-cli **1.8.47**)  
+**Last plan update:** 2026-10-22
+
+## Rust ship unit (2026-10-22)
+
+Same TP identity. The Rust suite does not renumber shell IDs. The Python files named in the 2026-10-22 unittest column are removed. Rows below name the Rust file that now holds the assertion.
+
+| TP-ID | Intent | Rust suite | Status |
+|-------|--------|------------|--------|
+| TP-DOC-01 | README badge, headings, absolute screenshot URLs, row 3 in the text picture | `tests/docs.rs` | **have** |
+| TP-ABOUT-01..16 | About page domain sentence, runtime tools, Basic Usage `rust-agent` | `tests/contract.rs` | **have** |
+| TP-LANG-01 | Front row 7, codes 80–92, save, env override | `tests/contract.rs` | **have** |
+| TP-TUI-09..12 | Front 1/3/5/6/7/9, self 62–68, path label | `tests/contract.rs` | **have** |
+| TP-LC-43..46 | zsh `.zprofile` / `.zshenv`, bash does not invent zsh files, rc-test | `tests/startup.rs` | **have** |
+| TP-CLI-04 / TP-CLI-08 | Unknown `join`, `list-videos`, `restore` | `tests/domain.rs` | **have** |
+| TP-CLI-13 / TP-CLI-19 / TP-CLI-20 | Front rows, this-login-only hides sudoers, auth 11–16 | `tests/contract.rs`, `tests/domain.rs` | **have** |
+| TP-GROK-CLI-09 / 22 | sync-auth skip when logged in; sudoer JSON is `backup` only | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-26..29 | add-crontab grant gate and idempotent install | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-30..34 | Four remote SPEC forms and fake scp/ssh | `tests/domain.rs` | **have** |
+| TP-VCLI-01 | domain source does not contain `install.sh` | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-46 | `run` inserts `--no-auto-update`; `update-grok` needs grok | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-22 | sudoer submit queues `backup` only; a wider grant is refused; missing sudoer-cli fails closed | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-23 | `remove-project-sudoers` deletes the user draft with `--force` and refuses `/etc` | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-15 | `print-sudoers-install-script` writes the draft and an admin script; `sh -n` passes | `tests/domain.rs` | **have** |
+| TP-GROK-CLI-03 | `proot` on `PATH` reads nested auth cookies and does not start `grok -p hello` | `tests/domain.rs` | **have** |
+
+**Residual:** shell TP-CLI-25 menu elapsed lines and the live Termux grok place (TP-VCLI-19..36, including Windows `.exe` and heal-on-skip) stay on `tests/run.sh`. They were not re-run in this conversion. The Rust wrapper contains `proot-exit-reaper`, `--kill-on-exit`, and the `start-services.sh` bind. The live non-PRoot probe is a 14-second subprocess timeout. Cache-tier silence stays on `requirement-shell-cli-storage` and `src/storage.rs`; this conversion does not add a new storage integration test.
+
+---
+
+# Historical plan — grok-cli shell reference
+
 **Suite entry:** `./tests/run.sh`  
 **Ship unit:** `src/grok-cli`  
 **Product VERSION:** 1.8.47  

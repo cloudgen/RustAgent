@@ -1,5 +1,7 @@
 **file**: docs/requirements/requirement-class-software-dev.md  
-**Status**: Active (Version 1.3.7 – leftover startup-file family points at requirement-shell-startup-files)  
+**Status**: Active (Version 1.3.9 – ship unit is the Rust crate rustagent; shell family remains behavior law)  
+
+> Ship unit (2026-10-22): primary language is Rust 2021. Crate **rustagent**. Console binary **`rust-agent`**. Display name **RustAgent**. Version **1.2.0** in `Cargo.toml` and `src/identity.rs`. Bootstrap parent for the text menu is sibling HolaTui. Do not edit HolaTui. Do not reverse-copy this tree onto HolaTui. Domain behavior is `requirement-domain-grok-cli`. `src/grok-cli` remains the POSIX behavior reference and is not the install story. The install story for this package is cargo. The live menu is `requirement-rust-tui`: HolaTui frame, path line, local clock, system-log on front row **3**, cargo self-management rows **62**–**68**, language codes **80**–**92**, plus the grok-auth, sudoers, and this-login-only **run** rows.
 **Area**: class  
 **Key**: `requirement-class-software-dev`  
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (CIAO = Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -8,7 +10,7 @@
 
 This file says two things:
 
-1. This workspace is a **software-development** project: a real program people can install, named `grok-cli`.  
+1. This workspace is a **software-development** project: a real program people can install, named `RustAgent` (console `rust-agent`).  
 2. It holds leftover software-stack facts that no other requirement file already owns.
 
 **SSOT** means **single source of truth**: the one official copy of a fact. This file is the class rulebook and the SSOT for those leftover stack facts.
@@ -118,33 +120,33 @@ A **lockfile** is a frozen list of dependency versions.
 
 | Field | Value (grok-cli) |
 |-------|---------------------|
-| **Project display name** | `grok-cli` |
+| **Project display name** | `RustAgent` |
 | **Project class** | software-development |
 | **Class requirement filename** | `requirement-class-software-dev.md` |
-| **Primary language(s)** | `posix-sh` (`/bin/sh`) |
-| **Language role** | primary only — one shell script file under `src/` |
-| **Execution model** | **interpreted** — no compile step |
-| **Toolchain / interpreter** | POSIX `/bin/sh` (dash / bash-as-sh compatible subset); no compiler |
-| **Toolchain version policy** | **unconstrained** among POSIX sh implementations that pass product tests |
+| **Primary language(s)** | Rust edition 2021. Crate rustagent. Compiler floor rustc 1.74 |
+| **Language role** | primary — `src/*.rs`. `src/grok-cli` is the POSIX behavior reference, not the install story |
+| **Execution model** | **compiled** — `cargo build` |
+| **Toolchain / interpreter** | rustc and cargo. POSIX `/bin/sh` remains the reference for `src/grok-cli` only |
+| **Toolchain version policy** | edition 2021; rustc 1.74 or newer |
 | **Cross-compile in scope?** | no |
-| **Primary project/package tool** | **none** — no language module system; the source file is the program people install |
-| **Lockfile policy** | not used |
-| **Test runner** | POSIX shell test suite under `tests/` when present (for example `tests/run.sh`) |
-| **Linter/formatter** | none as a project rule (shellcheck is optional for maintainers) |
+| **Primary project/package tool** | **cargo** — `Cargo.toml` and `Cargo.lock` |
+| **Lockfile policy** | `Cargo.lock` is committed with the crate |
+| **Test runner** | `cargo test --offline -- --test-threads=1`. `tests/run.sh` still runs the POSIX reference suite against `src/grok-cli` |
+| **Linter/formatter** | none as a project rule (shellcheck is optional for the POSIX reference) |
 | **Primary runtime / OS family** | POSIX Linux (and compatible UNIX where `/bin/sh`, `tar`, `gzip` / `tar -z`, and `mktemp` exist); **Termux / Android userspace** writing owned by `requirement-shell-termux-coding` |
 | **Architectures supported** | any architecture with POSIX sh and the external tools the script uses |
 | **Git surface** | used when the product is published |
-| **Ship unit / install** | yes — the **ship unit** (the program file people install) is `src/grok-cli` → `${USER_BIN}/grok-cli`; **dual-mode** (two install methods: primary `curl \| sh`; secondary checkout + `install`) |
-| **Product version SSOT** | `VERSION=` hard-assigned in `src/grok-cli` (do not pin an old number here) |
-| **Bootstrap origin** | sibling product **folder-backup**; chain: cli-template → folder-backup → grok-cli (domain retarget: keep the shell framework, change the product’s job) |
+| **Ship unit / install** | yes — the **ship unit** is the Rust crate `rustagent`, binary `rust-agent`. Install with `cargo install rustagent` or `cargo install --path .`. No sudo. `src/grok-cli` is not this package’s installer |
+| **Product version SSOT** | `Cargo.toml` `version` and `src/identity.rs` `VERSION`, both **1.2.0** |
+| **Bootstrap origin** | HolaTui (text menu) plus this tree’s grok-cli domain law. Do not edit HolaTui. Do not reverse-copy RustAgent onto HolaTui |
 
 **Leftover-ownership table** (who owns each topic):
 
 | Topic | Owner | Notes |
 |-------|-------|--------|
 | Project class membership | **this file** | Fixed |
-| Primary language + toolchain policy | **this file** | posix-sh, unconstrained |
-| Package/build tool + lockfile | **this file** | none / not used |
+| Primary language + toolchain policy | **this file** | Rust 2021, rustc 1.74 or newer. `src/grok-cli` stays POSIX sh |
+| Package/build tool + lockfile | **this file** | cargo / `Cargo.lock` |
 | Bootstrap lineage / keep-extend | `requirement-bootstrap-chain` | A=cli-template → B + domain extend |
 | Project layout / install path | `requirement-project-folder` | `src/` + bin targets + Termux `PREFIX` / `~/.grok` classes |
 | Commands you run as yourself / flags / dispatch | `requirement-shell-cli-interface` | **Type 0** = you run the command as yourself. Do not duplicate |

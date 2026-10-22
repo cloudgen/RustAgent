@@ -1,0 +1,20 @@
+[package]
+name = "rustagent"
+version = "1.2.0"
+edition = "2021"
+description = "RustAgent installs and runs xAI grok, and backs up its auth files."
+license = "MIT"
+authors = ["cloudgen <wongcf22@gmail.com>"]
+homepage = "https://github.com/cloudgen/RustAgent"
+repository = "https://github.com/cloudgen/RustAgent"
+readme = "README.md"
+keywords = ["cli", "tui", "grok"]
+
+[[bin]]
+name = "rust-agent"
+path = "src/main.rs"
+
+[dependencies]
+crossterm = "0.28"
+unicode-width = "0.2"
+serde_json = "1"

@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-10-22
+
+### Added
+
+- **Rust ship unit.** Crate `rustagent`, console `rust-agent`, version **1.2.0**. The text menu uses a path line, a local clock `HH:MM:SS`, a rounded input box, a status line, CJK columns, thirteen languages (**80**–**92**), system-log on front row **3**, cargo self-management rows **62**–**68**, typed `hello`, about, and Exit. The front board is **1** grok-auth, **3** system-log, **5** sudoers, **6** self-management, **7** language, **9** Exit. This-login-only adds **2** run and hides **5**. Choosing a listed row runs that verb. Empty arguments on a terminal open the menu and return 0. Empty arguments off a terminal print help and return 0. Install is `cargo install rustagent` or `cargo install --path .`. `src/grok-cli` stays the POSIX behavior reference. Peer binary remains `grok`. Auth files remain under `~/.grok`. Deposit is `/var/rust-agent`. The language leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process and does not write that file.
+- **Public repository.** `git@github.com:cloudgen/RustAgent.git` and `https://github.com/cloudgen/RustAgent`.
+- **Sudoer handoff.** `submit-sudoer-request` queues a backup-only grant when `sudoer-cli` and a writable inbound directory are present, and it does not write `/etc`. `remove-project-sudoers --force` deletes the user draft and refuses `/etc`. `print-sudoers-install-script` writes that draft and an admin script. A host with `proot` on `PATH`, and Termux, read `~/.grok/auth.json` cookies and do not run `grok -p hello`.
+
+### Changed
+
+- The Python package `AgentCli` is not the ship unit. There is no `python -m` entry and no pip install for this crate.
+
 ## [1.8.47] - 2026-10-12
 
 ### Added

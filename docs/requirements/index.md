@@ -1,12 +1,36 @@
 # Requirements index
 
-**Product:** grok-cli (POSIX `/bin/sh` CLI — grok auth backup to `/var/grok-cli` with narrow sudo deposit + unprivileged sync-auth; dual-mode install)  
-**Workspace state:** Specialized product law (left genesis); **software-development** class; bootstrap **cli-template → folder-backup → grok-cli** (domain) **plus** selfmanaged online package specialized onto grok-cli (channel `curl\|sh`).  
-**Updated:** 2026-10-12 (30 Active + 4 superseded; shell startup files 1.0.0; front **1** grok-auth, **5** sudoers (**51–55**), **6** self-management (**64**, **65**, **66**, **68**), **7** language (**80–92**), **9** Exit; this-login-only adds **2** run and omits **5**; front **8** is not a row; auth **11–16** unchanged; logged-out line names `backup`)
+**Product:** RustAgent (Rust crate and text menu). It installs and runs peer `grok`, and it backs up `~/.grok` auth files. Console binary `rust-agent`. Crate `rustagent`. Deposit `/var/rust-agent`. Renamed from AgentCli, which was renamed from grok-cli.  
+**Workspace state:** Specialized product law. **software-development** class. Bootstrap is HolaTui (text menu, sibling, read only) plus this tree's grok-cli domain law. Direction is HolaTui → RustAgent only. Do not edit HolaTui. `src/grok-cli` remains the POSIX behavior reference. Package install is cargo.  
+**Product version:** **1.2.0** (`Cargo.toml` and `src/identity.rs`). Shell reference notes below remain at grok-cli **1.8.47**.  
+**Updated:** 2026-10-22 (Rust ship unit; front **1** grok-auth, **3** system-log, **5** sudoers (**51–55**), **6** self-management (**62–68**), **7** language (**80–92**), **9** Exit; this-login-only adds **2** run and omits **5**; HolaTui path line, clock, input box, and cargo lifecycle stay)
 
 | ID / key | Title | Area | Status | Path | Updated |
 |----------|-------|------|--------|------|---------|
-| requirement-class-software-dev | Software-development class law + leftover stack (posix-sh, dual-mode); no dest approver / no dest fence; leftover PATH/profile → path-and-shell-support; leftover zsh PATH → zshenv; leftover ash PATH → alpine; leftover startup files → shell-startup-files | class | Active (1.3.7) | `requirement-class-software-dev.md` | 2026-10-12 |
+| requirement-class-software-dev | Software-development class law. Primary language Rust crate rustagent. Shell family remains behavior law. No dest approver | class | Active (1.3.9) | `requirement-class-software-dev.md` | 2026-10-22 |
+| requirement-rust-about | About page, host check, cache lines, star box, Basic Usage `rust-agent` | rust | Active (1.2.0) | `requirement-rust-about.md` | 2026-10-22 |
+| requirement-rust-cli-interface | Typed verbs. Empty argv is the menu on a terminal and help off a terminal. Cargo lifecycle | rust | Active (1.2.0) | `requirement-rust-cli-interface.md` | 2026-10-22 |
+| requirement-rust-cli-language | Menu language. Front row 7. Codes 80–92. Leaf `~/.local/RustAgent` | rust | Active (1.2.0) | `requirement-rust-cli-language.md` | 2026-10-22 |
+| requirement-rust-cli-logging | In-tree `StatusLog`. Quiet on the text screen. Kebab name `rust-agent` | rust | Active (1.2.0) | `requirement-rust-cli-logging.md` | 2026-10-22 |
+| requirement-rust-coding-style | Rust 2021 style. No vendor shell installer. No `install.sh` string | rust | Active (1.2.0) | `requirement-rust-coding-style.md` | 2026-10-22 |
+| requirement-rust-error-handling | Fail-closed errors, JSON `out_error`, and remote SPEC forms | rust | Active (1.2.0) | `requirement-rust-error-handling.md` | 2026-10-22 |
+| requirement-rust-modules | Module map under `src/*.rs`. No Join module | rust | Active (1.2.0) | `requirement-rust-modules.md` | 2026-10-22 |
+| requirement-rust-packaging | Cargo.toml crate `rustagent` 1.2.0, binary `rust-agent` | rust | Active (1.2.0) | `requirement-rust-packaging.md` | 2026-10-22 |
+| requirement-rust-project-structure | `src/*.rs` ship unit. `src/grok-cli` remains the POSIX reference | rust | Active (1.2.0) | `requirement-rust-project-structure.md` | 2026-10-22 |
+| requirement-rust-readme | Root README sections, text menu picture, absolute screenshot URLs | rust | Active (1.2.0) | `requirement-rust-readme.md` | 2026-10-22 |
+| requirement-rust-tui | Text menu. Front 1, 3, 5, 6, 7, 9. HolaTui frame. Self 62–68. Menu rows run the verbs | rust | Active (1.2.0) | `requirement-rust-tui.md` | 2026-10-22 |
+| requirement-runtime-prerequisites | In-tree logger. curl when setup downloads. No root auto-install. No ChronicleLogger | runtime | Active (1.3.0) | `requirement-runtime-prerequisites.md` | 2026-10-22 |
+| requirement-python-about | Retired about page for the Python package | python | superseded by `requirement-rust-about` | `requirement-python-about.md` | 2026-10-22 |
+| requirement-python-cli-interface | Retired Python entry | python | superseded by `requirement-rust-cli-interface` | `requirement-python-cli-interface.md` | 2026-10-22 |
+| requirement-python-cli-language | Retired Python language leaf | python | superseded by `requirement-rust-cli-language` | `requirement-python-cli-language.md` | 2026-10-22 |
+| requirement-python-cli-logging | Retired ChronicleLogger construct | python | superseded by `requirement-rust-cli-logging` | `requirement-python-cli-logging.md` | 2026-10-22 |
+| requirement-python-coding-style | Retired Python style | python | superseded by `requirement-rust-coding-style` | `requirement-python-coding-style.md` | 2026-10-22 |
+| requirement-python-error-handling | Retired Python errors | python | superseded by `requirement-rust-error-handling` | `requirement-python-error-handling.md` | 2026-10-22 |
+| requirement-python-oop | Retired class map | python | superseded by `requirement-rust-modules` | `requirement-python-oop.md` | 2026-10-22 |
+| requirement-python-packaging | Retired pyproject packaging | python | superseded by `requirement-rust-packaging` | `requirement-python-packaging.md` | 2026-10-22 |
+| requirement-python-project-structure | Retired `src/AgentCli` layout | python | superseded by `requirement-rust-project-structure` | `requirement-python-project-structure.md` | 2026-10-22 |
+| requirement-python-readme | Retired Python README law | python | superseded by `requirement-rust-readme` | `requirement-python-readme.md` | 2026-10-22 |
+| requirement-python-tui | Retired Python menu. Front 3 was not a row | python | superseded by `requirement-rust-tui` | `requirement-python-tui.md` | 2026-10-22 |
 | requirement-bootstrap-chain | Bootstrap: cli-template → folder-backup → grok-cli (domain) + selfmanaged online package | architecture | Active (4.0.0) | `requirement-bootstrap-chain.md` | 2026-09-02 |
 | requirement-project-folder | Project layout (`src/`), install bins, `/var/grok-cli` deposit; Termux `PREFIX` / `~/.grok` classes; cache leaves point at `requirement-shell-cli-storage`; persistence `${HOME}/.local/${APP_NAME}` | architecture | Active (1.2.1) | `requirement-project-folder.md` | 2026-09-27 |
 | requirement-three-layer-privilege-model | Type 0 + narrow Type 1 `grok-cli backup`; sudoers emit + install-script; per-user fragments; grant is backup only; samples use `id -un`; staging cache points at storage 1.4.0 | architecture | Active (2.0.2) | `requirement-three-layer-privilege-model.md` | 2026-09-27 |
@@ -47,11 +71,13 @@
 |---------|---------------------|
 | Type O-P payload installer | **Absent** (script-alone only) |
 
-**Install mode:** **dual-mode** (primary online channel; secondary checkout `install`). Matrix on `requirement-shell-online-install`.
+**Install mode:** cargo for this package (`self-install`, `self-update`, `self-uninstall`). Empty argv off a terminal prints help and returns 0. Peer `grok` is downloaded by `setup` with curl. This package does not run a vendor shell installer. The POSIX file `src/grok-cli` remains the behavior reference for the shell suite. Shell `curl | sh` is not this package’s installer. There is no Type O payload installer and no second Active domain file.
+
+**Menu:** Multi-user front rows are 1 grok-auth, 3 system-log, 5 sudoers, 6 self-management (62–68), 7 language, 9 Exit. This-login-only shows 2 run and hides 5. Language codes are 80–92. `system-log` is a menu token, not an argv verb. `hello` prints a welcome line and does not draw the menu. Choosing a listed row runs that verb. Rows 4 and 8 are absent.
 
 **Rules for agents:**
 
-1. Treat Active rows above as the **live product-law inventory** for grok-cli.  
+1. Treat Active rows above as the **live product-law inventory** for RustAgent.  
 2. **Do not invent** additional `requirement-*.md` paths — verify on disk and add a registry row in the same change when creating one.  
 3. Product source comments cite **only** these live requirement files — never templates/skills as behavioral authority.  
 4. This versioned surface lists **requirement rows only**.  

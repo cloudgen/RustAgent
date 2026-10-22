@@ -1,9 +1,8 @@
 # =============================================================================
-# .gitignore — skill-create-gitignore (+ skill-commit-check)
-# Product: grok-cli (specialized software-dev; local shell CLI)
-# Docs: track docs/requirements/** ; ignore skills/incidents/terminologies/policies/templates
-# Track: README, CHANGELOG, LICENSE, SECURITY, src/, tests/, reviews/
-# Artifacts: universal compiled/temp/secrets/caches; shell run debris
+# .gitignore — RustAgent (Rust CLI)
+# Detected: Rust (Cargo.toml, src/**/*.rs)
+# Docs: track docs/requirements/** ; ignore harness/skills/terms/policies/templates
+# Artifacts: compiled, caches, temp, secrets, local H2 backups
 # =============================================================================
 
 # --- Secrets / local env ---
@@ -12,6 +11,7 @@
 !.env.example
 !.env.sample
 *.pem
+*.key
 
 # --- OS ---
 .DS_Store
@@ -19,6 +19,7 @@
 Thumbs.db
 Desktop.ini
 ehthumbs.db
+._*
 
 # --- Editors / IDEs ---
 *.swp
@@ -42,68 +43,62 @@ temps/
 *.log
 logs/
 *.pid
-*.seed
 
-# --- Generic compiled / package outputs (defense in depth) ---
+# --- Rust ---
+/target/
+
+# --- Generic build / package ---
 build/
 dist/
 out/
-output/
-obj/
 *.o
-*.a
 *.so
 *.dylib
 *.dll
-*.exe
-*.class
-*.jar
-*.war
-*.ear
-*.py[cod]
-*.pyo
-*.pyd
 *.egg
 *.egg-info/
 *.whl
-*.rlib
-*.rmeta
+*.py[cod]
+*$py.class
 
-# --- Caches ---
-.cache/
-*.cache
-.turbo/
-.parcel-cache/
-.eslintcache
-.stylelintcache
-*.tsbuildinfo
+# --- Python ---
 __pycache__/
+.Python
+.venv/
+venv/
+ENV/
+env/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+.eggs/
+pip-wheel-metadata/
+*.pxd
 
-# --- Shell / local run debris ---
-*.YYYYMMDD-*.bak
+# --- Cython / local build debris ---
+*.c
+!src/**/*.c
 
-# --- Harness transfer safety backups (H1/H2; not payload) ---
-.harness-transfer-bak-*/
-.harness-sync-*-bak-*/
-.harness-*-bak-*/
-.harness-backup-*/
-
-# --- Agent contract (local workspace) ---
-AGENTS.md
-
-# --- Local harness backup dumps (never product surface) ---
-.h1-backup-*/
+# --- Local H2 / agent backups (never commit) ---
 .h2-backup-*/
+.h1-backup-*/
+.t2p-docs-backup-*/
 
-# --- Docs layer: ignore all docs, re-include requirements only ---
-# Includes docs/policies/ (policy-*.md), skills, terminologies, templates, etc.
-# Policies must NOT be public product surface.
+# --- Agent harness (root) — local only ---
+AGENTS.md
+CLAUDE.md
+.claude/
+.cursor/
+.codex/
+
+# --- Docs layer — track requirements only ---
 docs/**
+!docs/.gitignore
 !docs/requirements/
 !docs/requirements/**
-
-# --- Public product reviews (git-tracked when present) ---
-# reviews/ is at product root (not under docs/); keep tracked by default (no ignore)

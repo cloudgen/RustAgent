@@ -4,6 +4,8 @@
 **Key**: `requirement-domain-grok-cli`  
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
+> Ship unit (2026-10-22): Rust crate **rustagent**, console binary **`rust-agent`**, display name **RustAgent**, version **1.2.0**. The product was renamed from AgentCli, which was renamed from grok-cli. Where this file names the product command `grok-cli` or `agent-cli`, the console binary is `rust-agent`. The deposit directory is `/var/rust-agent`. Peer binary remains `grok`. Auth files remain under `~/.grok`. Behavioral MUST rules below stay. Empty argv on a terminal opens the text menu and does not run cargo and does not download grok. Empty argv with no terminal prints help and returns 0. Package install is cargo (`cargo install rustagent`, `cargo install rustagent --force`, `cargo uninstall rustagent`). This file does not run a vendor shell installer. The live menu picture is `requirement-rust-tui`: front row **3** is system-log, self-management rows are **62**–**68**, and language codes stay **80**–**92**. The POSIX file `src/grok-cli` keeps its own menu numbers. Do not open a second Active domain file for that menu delta.
+
 ## 1. Purpose
 
 This requirement is the **domain surface Single Source of Truth** for grok-cli: which **specialized CLI verbs** exist, what **help** and **about** must show, and how domain routing is labeled.

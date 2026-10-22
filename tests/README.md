@@ -1,40 +1,26 @@
-# Tests — grok-cli
+# Tests — RustAgent
 
-## Run
+## Product proof
+
+```sh
+cargo test --offline -- --test-threads=1
+```
+
+Exit **0** when the Rust suite passes. Ship unit: crate **rustagent** **1.2.0**, console `rust-agent`.
+
+| File | Focus | Law |
+|------|--------|-----|
+| `contract.rs` | Front rows, language 80–92, cargo self rows, about identity | `requirement-rust-tui`, `requirement-rust-cli-language`, `requirement-rust-about` |
+| `domain.rs` | Session, backup, sync, setup, crontab, sudoer handoff, `run` | `requirement-domain-grok-cli`, `requirement-rust-error-handling` |
+| `startup.rs` | `.zprofile` / `.zshenv`, rc-test | `requirement-shell-startup-files` |
+| `docs.rs` | README badge, headings, clock, absolute screenshot URLs | `requirement-rust-readme` |
+
+## POSIX reference
 
 ```sh
 ./tests/run.sh
-# or
-sh tests/run.sh
 ```
 
-Exit **0** when all assertions pass; **1** on failure; **2** if ship unit missing.
+`src/grok-cli` is the POSIX behavior reference. `tests/run.sh` is not the product proof. Exit **0** when that reference suite passes; **1** on failure; **2** if `src/grok-cli` is missing.
 
-## Layout
-
-| File | Focus | TP families |
-|------|--------|-------------|
-| `run.sh` | Entrypoint | — |
-| `helpers.sh` | Asserts + isolated HOME | — |
-| `test_cli.sh` | CLI surface, empty argv (TTY menu / off-TTY Type O; overlay `--debug` / `--quiet` follow 0-argv), this-login-only menu hide, logged-out lists **12** `sync-auth-from-remote` and **13** `sync-auth` and hides **11**; logged-in lists **11** `backup` and hides **12** and **13**; `sync-auth-to-remote` is not a numbered row, Termux menu does not freeze on hanging grok, reprint does not re-probe, probe always bounded, `--debug` menu elapsed of each paint step, invalid pick retries this menu layer, front **7** menu language (**80–92**) | **TP-CLI-*** |
-| `test_local_lifecycle.sh` | install / uninstall / where-is-me | **TP-LC-*** |
-| `test_domain_grok_cli.sh` | live `grok -p hello` session gate (incl. elevated `SUDO_USER` home; SIGTERM-ignoring hang bound; `proot` on PATH → reaper else simple `-p`) + backup/sync-auth + sync-auth-from-remote (incl. TTY menu row 3 SPEC prompt + preferred-remote default) + sync-auth-to-remote + add-crontab + sudoers print + JSON grant + submit inbound | **TP-GROK-CLI-*** |
-| `test_grok_setup.sh` | `setup` / `update-grok` / `reinstall` fetch xAI channel + artifact (fake curl; no public net; no `install.sh`); TTY keep / reinstall / Exit; Android wrapper `--kill-on-exit` / `proot-exit-reaper` / `-p` SIGKILL; heal stale wrapper on skip | **TP-VCLI-*** |
-| `test_online_install.sh` | Channel `curl|sh` ensure, checksum mismatch, version-check, version-aware self-update start line, self-uninstall (fake curl) | **TP-ONL-*** |
-
-## Isolation
-
-- Temp `HOME` + `USER_BIN` for install tests  
-- **No** public network  
-- **No** write to `/etc/sudoers.d` (suite never installs sudoers)  
-- Auth fixtures are synthetic (no live tokens); session tests inject a fake `GROK_BIN` (never `grok -p hello` against xAI)  
-- Backup **success** uses writable `GROK_CLI_ROOT` override (not `/var/grok-cli`)
-
-## Ship unit under test
-
-`src/grok-cli`
-
-## Maps
-
-Product TP map: `reviews/test-plan.md`  
-RTM: `reviews/requirement-test-matrix.md`
+The Python package `src/AgentCli` is removed. Python unit tests that imported it are removed with it.

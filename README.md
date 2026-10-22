@@ -1,469 +1,280 @@
-# grok-cli - Alternative online installer for xAI grok
+# RustAgent - Install and run xAI grok, and back up its auth files
 
-![Version](https://img.shields.io/badge/Version-1.8.47-blue?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-[![CIAO](https://img.shields.io/badge/Philosophy-CIAO%20(Caution%20%E2%80%A2%20Intentional%20%E2%80%A2%20Anti--fragile%20%E2%80%A2%20Over--engineered)-purple.svg)](https://github.com/cloudgen/ciao)
-[![Stars](https://img.shields.io/github/stars/cloudgen/grok-cli?style=flat-square)](https://github.com/cloudgen/grok-cli)
+[![Version](https://img.shields.io/badge/Version-1.2.0-blue?style=flat-square)](https://github.com/cloudgen/RustAgent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE.md)
+[![CIAO](https://img.shields.io/badge/CIAO-Defensive%20Programming-orange?style=flat-square)](https://github.com/cloudgen/ciao)
+[![Stars](https://img.shields.io/github/stars/cloudgen/RustAgent?style=flat-square)](https://github.com/cloudgen/RustAgent)
+[![Rust](https://img.shields.io/badge/Rust-2021-orange?style=flat-square)](https://www.rust-lang.org/)
 
-**grok-cli** is an alternative online installer for xAI’s `grok` CLI. The official one-liner on [x.ai](https://x.ai) (`curl -fsSL https://x.ai/cli/install.sh | bash`) is built for macOS, Linux, and Windows. It is **not** intended for Termux or other “this login only” phones. This program fetches the **same** vendor `grok` binary from xAI’s CLI channel and places it under `~/.grok` — it does **not** download or run `install.sh`.
-
-### Why grok-cli is a better alternative
-
-x.ai’s installer is the right path on a laptop. On a phone (and on any host that installer does not cover) it typically fails in ways that look like a broken download: wrong CPU if you `scp` grok from an x86_64 PC onto aarch64 Termux; Android’s linker refuses the static Linux file (`unexpected e_type: 2`); Termux has no `nameserver` in `/etc/resolv.conf` so `grok login` hits a DNS error; after a correct install, `grok -p hello` prints the answer and then **hangs until Ctrl-Z**.
-
-This program is a better alternative **there** because it is written for that host instead of hoping `install.sh` will cope:
-
-| Official `install.sh` | grok-cli |
-|-----------------------|----------|
-| One-liner assumes macOS / Linux / Windows | POSIX `/bin/sh` (does **not** need bash); Termux `PREFIX` / `pkg` as this login |
-| Places whatever the script assumes | `setup` fetches the matching `linux-*`, Darwin, or (Git Bash/MSYS/Cygwin) `windows-*.exe` artifact and **smokes `--version` on this host** |
-| No check that an x86_64 copy runs on a phone | Wrong ELF is **not** “already installed”; `--force` replaces it |
-| Silent skip when grok is already on disk | On a real terminal, **keep** / **reinstall** / **Exit**; scripts and `--json` skip |
-| Android `ET_EXEC` refusal looks like a truncated file | Retries `TERMUX_EXEC_OPTOUT`, may `pkg install -y proot` (no sudo), wraps grok **without editing vendor bytes** |
-| musl grok reads `/etc/resolv.conf` with no nameserver | Binds `~/.grok/resolv.conf` over `/etc/resolv.conf` via PRoot |
-| `grok -p` hangs: leftover Termux `runsvdir` keep PRoot in `do_wait` | From **1.8.22**: bind a no-op over `start-services.sh` so login-shell env capture does not spawn those daemons; reaper as safety net so `-p` returns |
-| Login truth is “the file is there” | `check-session` / the numbered list run live `grok -p hello` |
-
-It is **not** a second grok program and **not** official x.ai Termux support. After `setup`, open a new terminal if `grok` is not on this session’s PATH, then `grok login` (or set `XAI_API_KEY`). Sharing `~/.grok/auth.*` across logins on one host is optional later work (`backup` / `sync-auth`), not the reason this tool exists.
-
-| You | Official x.ai installer | Not this |
-|-----|-------------------------|----------|
-| Install grok-cli, then `grok-cli setup` (no sudo) | `curl -fsSL https://x.ai/cli/install.sh \| bash` on macOS / Linux / Windows | A second grok binary; executing x.ai’s `install.sh`; claiming official Termux support |
+RustAgent installs and runs the peer binary `grok`, and it backs up `~/.grok` auth files. Typed verbs do that work in the terminal. The text menu uses the same tokens. `hello` prints one welcome line and does not draw the menu. **Exit** is menu-only.
 
 ## Features
 
-- **Install grok without x.ai’s `install.sh`**: type `grok-cli setup`. It detects this computer, downloads the matching grok program from xAI, checks that `--version` runs from `~/.grok/downloads` (not `/tmp` or the cache folder — some phones refuse to run files from there), and places `~/.grok/bin/grok` (Git Bash: `grok.exe`). If grok already **runs on this host**, a real terminal offers **keep** / **reinstall** / **Exit** (pick **2** to remove and install again). Scripts and `--json` skip. An x86_64 file copied onto an aarch64 phone is replaced. On Termux, if the phone will not run the vendor file, setup may install `proot` with `pkg` (this login, no sudo) and place a wrapper — it still does **not** edit the vendor file. On Git Bash / MSYS / Cygwin it fetches the **windows** `.exe` (copy, not symlink). `--force` downloads again without the list. POSIX `/bin/sh` (does **not** need bash).
-- **Termux-aware place**: uses `${PREFIX}/bin` when `PREFIX` is set. A missing `/etc/resolv.conf` is a note, not an install failure, when `--version` succeeded. If grok still will not run: `pkg install proot`, then `grok-cli setup --force`. From **1.8.22** the PRoot wrapper stops leftover `runsvdir` from freezing `grok -p` (see **Platform Compatibility**).
-- **Install this program**: paste the curl one-liner; later `version-check`, `self-update`, `self-uninstall`
-- **Install from a checkout**: `install`, `uninstall`, `where-is-me`, `version`, `about`, `help`, `menu`
-- **Scratch is per login and per process.** `about` prints **Cache folder used**, **preferred**, **1st fallback**, and **2nd fallback** when this computer has one. Linux uses `/dev/shm/cache/cache-<app>-<login>-<pid>`, then `/tmp/cache/...`, then `~/.cache/cache-<app>-<pid>`. Git Bash uses `/tmp/cache/...`, then `~/AppData/Local/Temp/cache-<app>-<pid>`. Mac uses `/tmp/cache/...`, then `~/Library/Caches/cache-<app>-<pid>`, then `~/cache/cache-<app>-<pid>`. A skipped folder is silent. Durable data for this login stays `~/.local/grok-cli`. On a phone, do not run a downloaded program from the cache folder.
-- **Update grok without grok auto-update**: type `grok-cli update-grok`. Fetches the latest xAI grok into `~/.grok` (Termux grok updater is unsupported). This is **not** `self-update` (that refreshes grok-cli). Missing grok → `grok-cli setup`.
-- **Reinstall grok from the start list**: type `grok-cli reinstall`, or pick **reinstall** on the numbered list. Same fetch as `setup --force`. Keeps `auth.*`. Missing grok still installs. `setup` stays off the list.
-- **Start grok without auto-update**: type `grok-cli run` (or `grok-cli run -p hello`). On Termux this avoids the hang until Ctrl-Z. Missing grok → `grok-cli setup`.
-- **Prove grok is logged in**: on Termux/PRoot, `check-session` reads local `~/.grok/auth.json` cookies (live `grok -p hello` is skipped — it usually times out). On other hosts it still asks grok a one-line question (`grok -p hello`). Missing grok → `grok-cli setup`, then `grok login`.
-- **Optional shared login on one Linux host**: `backup` copies `~/.grok/auth.*` into `/var/grok-cli` as `root:root` `0644` (elevated probe uses **this** login’s grok home, not root’s); `sync-auth` copies that store into this login’s `~/.grok` with **no sudo** (skipped if grok is already logged in — prints `No sync-auth for logged-in environment.`); `sync-auth-from-remote` uses `scp` (same skip) and remembers the last remote; `sync-auth-to-remote` copies this login’s `~/.grok/auth.*` onto that remote login’s `~/.grok` (no sudo; still runs when this grok is already logged in); `add-crontab` adds this login’s timers after **this** login’s backup grant exists
-- **Optional passwordless backup grant** (only if you use `backup`): `print-sudoers` prints one line so this login may run `sudo grok-cli backup` without a password. A host admin installs that line. `generate-sudoer-request` / `submit-sudoer-request` hand the same grant to the named approver (`sudoer-adm`).
-- **Stops when it should**: grok missing or not answering, unauthorized copy into `/var/grok-cli`, unreadable store, failed grok download
+- Console binary `rust-agent`. There is no `python -m` entry.
+- On a terminal with no arguments, the text menu opens. The first row names the current directory on the left and a local clock (`HH:MM:SS`) on the right when the row has room.
+- Multi-user front rows are **1 grok-auth**, **3 system-log**, **5 sudoers**, **6 self-management**, **7 language**, and **9 Exit**. A this-login-only host shows **2 run** and hides **5**. **4** and **8** are not rows.
+- **grok-auth** covers session, backup, sync, crontab, setup, and reinstall. **sudoers** covers the backup grant only. **system-log** covers view, clear, and the log folder.
+- Thirteen menu languages, codes **80**–**92**. **70**–**79** and **93**–**98** stay unprinted so a later language can be added. The saved leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process and does not write the file. `language` is not a typed verb.
+- **about** stays in English. It prints the domain line, the runtime tools, a host check, the cache tiers, and the persistence folder.
+- Cargo lifecycle: `version-check`, `self-update`, `self-install`, and `self-uninstall`. Those verbs do not use sudo. `self-uninstall` on the command line needs `--force`.
+- Empty arguments on a terminal do not run cargo and do not download `grok`. With no terminal and no verb, the program prints help and returns 0.
+
+## Advantages
+
+1. **Two ways to do the work.** A menu number and the same typed verb share one action. `rust-agent hello` prints `Welcome to RustAgent 1.2.0.` and does not draw the menu. With no arguments on a terminal, the text menu opens and waits. With no terminal and no verb, the program prints help and returns 0.
+2. **Built-in languages.** Row **7** lists thirteen languages. The numbers are **80** through **92**. **70** through **79** and **93** through **98** stay unprinted so a later language can be added. The choice is saved for the next run. Leaf shorts stay English.
+3. **Cache and persistence.** Linux prefers `/dev/shm/cache`, then `/tmp/cache`, then a leaf under the home cache directory. A missed tier is silent. Persistence is `~/.local/RustAgent`. The about page names the tier this process selected.
+4. **A narrow root path.** The only elevated action is `rust-agent backup`, and only after an administrator installs a sudoers fragment whose argument is `backup`. Other verbs stay this login. Peer `grok` is fetched by `setup` from the vendor channel, then the public fallback. This package does not run a vendor shell installer.
+
+| Feature | Typed verb | Text menu |
+|---------|------------|-----------|
+| Daily start on a terminal | `rust-agent menu` | empty argv |
+| Welcome line | `rust-agent hello` | not a front row |
+| Peer binary | `rust-agent setup` | grok-auth row **15** |
+| Auth deposit | `rust-agent backup` | grok-auth row **11** when signed in |
+| Menu language | not a verb | row **7**, codes **80**–**92** |
+| System log | not a verb | front row **3**, then **31**–**33** |
+| This computer | `rust-agent about` | self-management row **63** |
+| Cargo lifecycle | `version-check`, `self-update`, `self-install`, `self-uninstall` | rows **64**, **65**, **66**, and **67**. **62** is version. **68** is `where-is-me` |
 
 ## Quick Installation
 
-**Official grok installer** (macOS / Linux / Windows; not intended for Termux):
+**Rust:** edition 2021. `setup` needs `curl` when it downloads peer `grok`.
 
-```sh
-curl -fsSL https://x.ai/cli/install.sh | bash
+```bash
+cargo install rustagent
 ```
 
-**This project** (POSIX `/bin/sh`; Termux-friendly procedure — still the vendor `grok` binary):
+This installs the console entry **`rust-agent`**. The crate name is `rustagent`. This tree is **1.2.0**. Nothing in this tree uploads a release by itself.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/cloudgen/grok-cli/main/src/grok-cli | sh
-grok-cli setup
+From a checkout of the public repository [github.com/cloudgen/RustAgent](https://github.com/cloudgen/RustAgent):
+
+```bash
+git clone git@github.com:cloudgen/RustAgent.git
+cd RustAgent
+cargo install --path .
 ```
 
-Then open a **new terminal** if this session cannot find `grok`, and run `grok login`.
+HTTPS:
 
-On **Alpine** the login shell is ash (`echo $0` prints `-ash`). If `~/.profile` is missing, install creates it: bash, zsh, and fish get a login note that sources `~/.bashrc`; ash gets that same note and also `~/.local/bin` on `PATH`. If `~/.profile` is already there, only ash adds the `PATH` line. A zsh login also gets that PATH line on `~/.zshenv` (every start) and on `~/.zprofile` (login, after the system `path_helper`). A bash-only login does not invent those zsh files. A missing `.zshenv` or `.zprofile` is created when this shell is zsh. Open a new login, or run `. ~/.profile`, before `grok-cli setup`. The shell that ran `curl | sh` does not inherit the new PATH by itself.
+```bash
+git clone https://github.com/cloudgen/RustAgent.git
+```
 
-These lines are the program’s own messages. `$tmpdir` stands for a throw-away folder, not this login’s home. `$HOME` in the PATH lines is that folder’s home:
+After install, on a terminal, `rust-agent` with no arguments prints this screen. The verb is the short token. The note after the colon is the explanation. `9` leaves. `0` on a submenu goes back. A number that is not on the list prints an error and lets you choose again. The path row is the current directory and a local clock (`HH:MM:SS`).
 
 ```text
-$ grok-cli rc-test --root "$tmpdir/profile" --file profile --case create
-→ Created $tmpdir/profile/.profile (login shell sources ~/.bashrc)
-[OK] rc-test profile create under $tmpdir/profile
-$ grok-cli rc-test --root "$tmpdir/zshenv" --file zshenv --case create
-→ Created $tmpdir/zshenv/.zshenv
-→ Added $HOME/.local/bin to PATH for zsh (.zshenv)
-[OK] rc-test zshenv create under $tmpdir/zshenv
-$ grok-cli rc-test --root "$tmpdir/zprofile" --file zprofile --case create
-→ Created $tmpdir/zprofile/.zprofile
-→ Added $HOME/.local/bin to PATH for zsh (.zprofile)
-[OK] rc-test zprofile create under $tmpdir/zprofile
+$ rust-agent
+Path: <current directory>                                          HH:MM:SS
+1. grok-auth      : backup, sync, crontab, setup, and reinstall
+3. system-log     : view, clear, and the log folder
+5. sudoers        : grant and drafts
+6. self-management: version, about, and cargo lifecycle
+7. language       : display language for this menu
+9. Exit           : leave
+╭──────────────╮
+│ > █          │
+╰──────────────╯
+  RustAgent 1.2.0  │  main menu  │  Up/Down  •  Enter
 ```
-
-If grok already **runs** on this host, a real terminal offers keep / reinstall / Exit (pick **2** to install again). Scripts and `--json` skip. `--force` skips the list.
-
-```text
-$ grok-cli setup
-[INFO] **grok-cli**(*1.8.47*) — setup
-[INFO] grok is already installed at ~/.grok/bin/grok.
-1. keep: Leave the existing grok
-2. reinstall: Remove existing grok and install again
-9. Exit
-Choice [1]:
-```
-
-On **Termux (aarch64)** run `grok-cli setup` **on the phone**. `scp` of `~/.grok/bin/grok` from an x86_64 host copies `linux-x86_64` and Termux will reject it (`EM_X86_64` instead of `EM_AARCH64`). `setup` fetches `linux-aarch64` from x.ai; `--force` replaces a copied x86_64 file. If `--version` fails with `unexpected e_type: 2`, setup tries `pkg install -y proot` on Termux and wraps grok. If that still cannot run: `pkg install proot`, then `grok-cli setup --force`.
-
-**Global grok-cli (root):**
-
-```sh
-sudo curl -fsSL https://raw.githubusercontent.com/cloudgen/grok-cli/main/src/grok-cli | sudo sh
-```
-
-**Integrity (automatic, no env pin):** SHA-256. The program fetches the companion `${SCRIPT_URL}.sha256` itself and prints **link**, **value**, and **result**.
-
-| Result | What happens |
-|--------|----------------|
-| Match | Install continues |
-| Mismatch | Abort (non-zero) |
-| Missing sidecar | Warn and continue |
-
-Companion file in-repo: `src/grok-cli.sha256`  
-Companion URL: `https://raw.githubusercontent.com/cloudgen/grok-cli/main/src/grok-cli.sha256`
-
-**From a checkout (offline copy of grok-cli, no network):**
-
-```sh
-sh src/grok-cli install
-# or force refresh after updates
-sh src/grok-cli install --force
-
-# Ensure ~/.local/bin is on PATH, then:
-grok-cli version
-grok-cli setup
-```
-
-**Global grok-cli from checkout** (preferred before durable sudoers / production elevation):
-
-```sh
-sudo sh src/grok-cli install
-# or: grok-cli install --global   # needs write access to /usr/local/bin
-# Managed binary mode is always 0755 so every user can run the shell ship unit.
-```
-
-**Optional — sudoers** (only if a non-root login will deposit into root-owned `/var/grok-cli`):
-
-```sh
-grok-cli print-sudoers-install-script
-# Admin (account with sudo rights) — handoff script (path printed by CLI):
-sudo sh /dev/shm/grok-cli-<user>-sudoers-admin.sh install
-
-# Or JSON grant for sudoer-adm:
-grok-cli generate-sudoer-request
-grok-cli submit-sudoer-request
-```
-
-Local `~/.local/bin` install is **not** production-secure for host elevation — the user can change the binary. Prefer global install for any host that keeps `/etc/sudoers.d/grok-cli-<user>`. See [`SECURITY.md`](./SECURITY.md).
-
-This product is **dual-mode**: primary install is the curl one-liner; `sh src/grok-cli install` copies the running checkout.
-
-**Source repository:** [cloudgen/grok-cli](https://github.com/cloudgen/grok-cli)  
-Config identity: `REPO_USER=cloudgen`, `REPO_NAME=grok-cli`. Default channel: `SCRIPT_URL=https://raw.githubusercontent.com/cloudgen/grok-cli/main/src/grok-cli`.
-
-After install, on a terminal:
-
-```text
-$ grok-cli menu
-[INFO] **grok-cli**(*1.8.47*) — Alternative online installer for xAI grok
-[INFO] logged out
-[INFO] backup features are not available for logged-out environment.
-1. grok-auth: *Backup, sync, crontab, setup, and reinstall*
-5. sudoers: *Grant and drafts*
-6. self-management: *Check, update, or remove grok-cli*
-7. language: *display language for this menu*
-9. Exit
-```
-
-Pick **1** for the auth list. Numbers **14–16** stay put when a row is hidden. Logged out lists **12** `sync-auth-from-remote` and **13** `sync-auth`, and hides **11**. Logged in lists **11** `backup` and hides **12** and **13**. `sync-auth-to-remote` is a typed command, not a row:
-
-```text
-12. sync-auth-from-remote: *Copy a remote host's auth.* into ~/.grok*
-13. sync-auth: *Copy /var/grok-cli/auth.* into ~/.grok*
-14. add-crontab: *Add backup and sync-auth jobs to this login's crontab*
-15. setup: *Install grok from x.ai*
-16. reinstall: *Remove existing grok and install again*
-0. Back
-9. Exit
-```
-
-On Termux / Git Bash / Windows cmd, **backup**, **sync-auth**, and **sudoers** are omitted. Each of those notices is its own `[INFO]` line. The top list is **1** grok-auth, **2** run (start grok without auto-update), **6** self-management, **7** language, and **9** Exit. Row **7** is on every host. Front **8** is not a row. There is no Back row. When the session is **logged out** or **timeout**, an `[INFO]` line is **appended**: `backup features are not available for logged-out environment.` Auth **12** is listed. Auth **11** and **13** stay off this class. When the session is **logged in**, that logged-out line is omitted, auth **12** is omitted, and a second `[INFO]` line is **appended**: `sync-auth and sync-auth-from-remote features are not available for logged-in environment.` Neither line replaces the host line. `sync-auth-to-remote` is not a numbered row. Termux, logged out:
-
-```text
-$ grok-cli menu
-[INFO] **grok-cli**(*1.8.47*) — Alternative online installer for xAI grok
-[INFO] logged out
-[INFO] backup, sync-auth and sudoers features are not available in termux.
-[INFO] backup features are not available for logged-out environment.
-1. grok-auth: *Backup, sync, crontab, setup, and reinstall*
-2. run: *Start grok without auto-update*
-6. self-management: *Check, update, or remove grok-cli*
-7. language: *display language for this menu*
-9. Exit
-```
-
-Live capture on a multi-user host that is **logged in**:
-
-```text
-$ grok-cli menu
-[INFO] **grok-cli**(*1.8.47*) — Alternative online installer for xAI grok
-[INFO] logged in
-[INFO] sync-auth and sync-auth-from-remote features are not available for logged-in environment.
-1. grok-auth: *Backup, sync, crontab, setup, and reinstall*
-5. sudoers: *Grant and drafts*
-6. self-management: *Check, update, or remove grok-cli*
-7. language: *display language for this menu*
-9. Exit
-```
-
-`5` opens sudoers. `6` opens self-management. `7` opens language. **61** install, **62** version, **63** about, and **67** self-install stay unprinted.
-
-```text
-51. generate-sudoer-request: *Write a JSON grant you can read*
-52. submit-sudoer-request: *Queue the JSON grant inbound*
-53. print-sudoers: *Emit sudoers draft*
-54. print-sudoers-install-script: *Write admin install script*
-55. remove-project-sudoers: *Remove sudoers draft only*
-0. Back
-9. Exit
-```
-
-```text
-64. version-check: *Compare local version with the channel*
-65. self-update: *Re-download grok-cli from the channel*
-66. self-uninstall: *Remove grok-cli*
-68. where-is-me: *Show running and install paths*
-0. Back
-9. Exit
-```
-
-```text
-80. English: *use English for this menu*
-81. 简体中文: *use Simplified Chinese for this menu*
-82. 繁體中文: *use Traditional Chinese for this menu*
-83. Español: *use Spanish for this menu*
-84. العربية: *use Arabic for this menu*
-85. Français: *use French for this menu*
-86. Português: *use Portuguese for this menu*
-87. Русский: *use Russian for this menu*
-88. Deutsch: *use German for this menu*
-89. 日本語: *use Japanese for this menu*
-90. 한국어: *use Korean for this menu*
-91. Nederlands: *use Dutch for this menu*
-92. Ελληνικά: *use Greek for this menu*
-0. Back
-9. Exit
-```
-
-Choose a number, or type the command name. `7` opens the language list (**80** English, **81** 简体中文, **82** 繁體中文, **83** Español, **84** العربية, **85** Français, **86** Português, **87** Русский, **88** Deutsch, **89** 日本語, **90** 한국어, **91** Nederlands, **92** Ελληνικά). **70–79** and **93–98** are reserved and are not printed. The choice is saved under `~/.local/grok-cli/language` and the next run opens in that language. `GROK_CLI_LANG` overrides one run and does not write the file. `language` is not a command you type on the shell. `9` exits from every list. `0` goes back only inside a submenu. The top list has no Back row. The line under the title is an independent `[INFO]` **logged in**, **timeout**, or **logged out**. On Termux/PRoot that line comes from local `auth.json` cookies (no `grok -p hello` wait). On other hosts it is a live `grok -p hello`; a hang that hits the bound prints **timeout**, not **logged out**. On a real terminal the descriptions after the colon are gray and italic. `setup` and `reinstall` are on the grok-auth list (**15** and **16**), not on the top list. Direct `grok-cli reinstall` still works. A later `sync-auth-from-remote` or `sync-auth-to-remote` remembers the last remote in persistence and offers it as the prompt default.
 
 ## Usage
 
-| How you run it | What you get |
-|----------------|--------------|
-| `grok-cli` or `grok-cli --debug` at a real terminal | Numbered start list (**1** grok-auth, **5** sudoers, **6** self-management, **7** language, **9** Exit; no Back on that list; this-login-only shows **2** run and hides sudoers; **7** stays on every host; front **8** is not a row; **logged in** / **timeout** / **logged out** under the title from `grok -p hello`; Termux / Git Bash / Windows cmd hide backup / sync-auth / sudoers; logged-out session hides **11** `backup` and lists **12** `sync-auth-from-remote` and **13** `sync-auth` on a multi-user host; logged-in session hides **12** and **13** and lists **11** `backup`; `sync-auth-to-remote` is a typed command and is not a numbered row; each session appends its own not-available line; **9** leaves; **0** goes back only inside a submenu). Same as `grok-cli menu`. Overlay switches with no command still follow empty argv. |
-| `curl -fsSL … \| sh` or `grok-cli` in a script (no args) | Install-ensure: places `~/.local/bin/grok-cli` or reports already installed. **Not** help. **Not** the menu. |
-| `grok-cli help` or `grok-cli --json` (no command) | Help / JSON help. `--json` with no command is empty argv **special case**: JSON help even at a prompt |
-| `grok-cli menu` in a script | Help (the list is TTY-only) |
-| `grok-cli setup` at a real terminal | If grok already runs: numbered **keep** / **reinstall** / **Exit**. Pick **2** to remove existing grok and install again. Scripts / `--json` skip. `--force` fetches without the list. |
-| `grok-cli reinstall` | Remove existing grok and install again (keeps `auth.*`). Same as pick **16** on the grok-auth list. Missing grok still installs. |
-
-```sh
-grok-cli                 # numbered list on a real terminal; install-ensure in a script / pipe
-grok-cli help
-grok-cli menu            # same numbered list as empty argv on a TTY
-grok-cli about
-grok-cli --json about
-grok-cli version-check
-grok-cli self-update
-
-grok-cli setup                 # install grok from x.ai (TTY: keep or reinstall if already there)
-grok-cli update-grok           # update grok from x.ai (not grok-cli; avoids grok auto-update)
-grok-cli reinstall             # remove existing grok and install again (keeps auth.*)
-grok-cli run                   # start grok without auto-update (Termux)
-grok-cli run -p hello
-grok-cli check-session
-grok-cli backup
-grok-cli sync-auth
-grok-cli sync-auth-from-remote user@192.0.2.10
-grok-cli sync-auth-to-remote user@192.0.2.10
-grok-cli add-crontab
-
-grok-cli print-sudoers
-grok-cli generate-sudoer-request
-grok-cli submit-sudoer-request
-grok-cli uninstall --force
-grok-cli self-uninstall --force
+```bash
+rust-agent
 ```
 
-**Environment (selected):**
+**hello** prints the welcome line in the terminal and does not draw the menu:
 
-| Variable | Role |
-|----------|------|
-| `SCRIPT_URL` | grok-cli install channel (default github raw `src/grok-cli`) |
-| `GROK_HOME` | Grok auth directory (default `~/.grok` of the invoking login) |
-| `GROK_VENDOR_BASE_URL` | xAI grok channel/artifact base (default `https://x.ai/cli`) |
-| `GROK_CHANNEL` | grok channel (`stable` / `alpha` / `enterprise`; default `stable`) |
-| `GROK_BIN` | Override path to peer `grok` |
-| `GROK_PROMPT_TIMEOUT` | Seconds to wait for live `grok -p hello` (default 14; kept even when Termux/PRoot skips that probe) |
-| `DEBUG` | `1` or flag `--debug`: stderr diagnostics; numbered menu prints elapsed of each paint step |
-| `GROK_PROMPT_KILL_AFTER` | SIGKILL grace after that deadline (default 2; GNU `timeout -k`) |
-| `GROK_CLI_ROOT` | Durable auth store (default `/var/grok-cli`; optional sharing) |
-| `ALLOW_TEST_LOCAL_SUDOERS` | `1` = allow test-mode sudoers emit without `--allow-test-local` |
-| `SUDOER_CLI` | Override path to `sudoer-cli` |
-| `SUDOER_ADM_USER` | Approver login to detect (default `sudoer-adm`) |
+```bash
+rust-agent hello
+```
+
+```bash
+rust-agent help
+rust-agent version
+rust-agent about
+rust-agent hello
+rust-agent setup
+rust-agent check-session
+rust-agent backup
+rust-agent where-is-me
+rust-agent version-check
+rust-agent self-update
+rust-agent self-install
+rust-agent self-uninstall --force
+```
+
+`version` prints `RustAgent 1.2.0` and does not call cargo. `about` shows one English page: the product identity, a host check of this computer, the cache tiers, the persistence folder, and a star box. Basic Usage on that page is `rust-agent`. It does not call cargo. `hello` prints `Welcome to RustAgent 1.2.0.` and does not draw the menu. `help` prints usage.
+
+`setup` downloads peer `grok` for this platform and links `~/.grok/bin/grok`. `backup` copies `auth.*` into `/var/rust-agent` when this login may run that one command as root. `sync-auth` copies the deposit back and skips that copy when grok is already signed in. `add-crontab` stays closed until the backup grant is present.
+
+`version-check` runs `cargo search rustagent --limit 1`. `self-update` runs `cargo install rustagent --force`. `self-install` runs `cargo install rustagent`. `self-uninstall` runs `cargo uninstall rustagent` and needs `--force` on the command line. Those cargo verbs do not use sudo. Empty arguments do not install or update.
+
+`rust-agent install` writes this login's shell startup files so `~/.local/bin` is on PATH. A zsh login gets that line on `.zshenv` and again on `.zprofile`. A bash-only login does not invent those zsh files. `.zshrc` is not a PATH file. `rust-agent rc-test` is test-purpose: it writes only under `--root` and leaves this login's real notes still. `rust-agent uninstall --force` may remove this product's installer stickers and does not delete the files.
+
+## Screenshots
+
+The fenced picture under Quick Installation is the live menu: front row **3** is system-log, and the status line is `RustAgent 1.2.0`. The PNG files below are earlier AgentCli captures. They still show `AgentCli` on the status line. They do not show RustAgent 1.2.0. On those captures the path is `/tmp/agent-cli-shots` and the clock is `12:06:45`. Leaf shorts stay English. **1 grok-auth** is highlighted on each main-menu capture.
+
+### `language-menu.png`
+
+Row **7** has opened the language list. **80 English** is highlighted, with the note "use English for this menu." The other rows are **81 简体中文**, **82 繁體中文**, **83 Español**, **84 العربية**, **85 Français**, **86 Português**, **87 Русский**, **88 Deutsch**, **89 日本語**, **90 한국어**, **91 Nederlands**, and **92 Ελληνικά**. Each note says to use that language for this menu. **0 Back** says "return to the main menu." The path label is `Path`. The status line says `language`.
+
+![Language list, 80 English highlighted](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/language-menu.png)
+
+### `main-menu-en.png`
+
+English main menu. There is no saved-language line above the box. The path label is `Path`. **1 grok-auth** is "backup, sync, crontab, setup, and reinstall." Then **5 sudoers** "grant and drafts," **6 self-management** "check, update, or remove this package," **7 language** "display language for this menu," and **9 Exit** "leave." The status line says `main menu`.
+
+![English main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-en.png)
+
+### `main-menu-zh-hans.png`
+
+Simplified Chinese main menu. The line above the box says `菜单语言是简体中文`. The path label is `路径`. **1 grok-auth** stays the English token. **5** stays `sudoers`. **6** is `自我管理`, **7** is `语言`, and **9** is `离开`. The status line says `主菜单`.
+
+![Simplified Chinese main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-zh-hans.png)
+
+### `main-menu-zh-hant.png`
+
+Traditional Chinese main menu. The line above the box says `選單語言是繁體中文`. The path label is `路徑`. **5** stays `sudoers`. **6** is `自我管理`, **7** is `語言`, and **9** is `離開`. The status line says `主選單`.
+
+![Traditional Chinese main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-zh-hant.png)
+
+### `main-menu-es.png`
+
+Spanish main menu. The line above the box says `El idioma del menú es español`. The path label is `Ruta`. **6** is `autogestión`, **7** is `idioma`, and **9** is `Salir`. The status line says `menú principal`.
+
+![Spanish main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-es.png)
+
+### `main-menu-ar.png`
+
+Arabic main menu. The line above the box says `لغة القائمة هي العربية`. The path label is `المسار`. The numbers stay on the left. **6** is `إدارة ذاتية`, **7** is `لغة`, and **9** is `خروج`. The status line says `القائمة الرئيسية`.
+
+![Arabic main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-ar.png)
+
+### `main-menu-fr.png`
+
+French main menu. The line above the box says `La langue du menu est le français`. The path label is `Chemin`. **6** is `autogestion`, **7** is `langue`, and **9** is `Quitter`. The status line says `menu principal`.
+
+![French main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-fr.png)
+
+### `main-menu-pt.png`
+
+Portuguese main menu. The line above the box says `O idioma do menu é português`. The path label is `Caminho`. **6** is `autogestão`, **7** is `idioma`, and **9** is `Sair`. The status line says `menu principal`.
+
+![Portuguese main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-pt.png)
+
+### `main-menu-ru.png`
+
+Russian main menu. The line above the box says `Язык меню — русский`. The path label is `Путь`. **6** is `самоуправление`, **7** is `язык`, and **9** is `Выход`. The status line says `главное меню`.
+
+![Russian main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-ru.png)
+
+### `main-menu-de.png`
+
+German main menu. The line above the box says `Die Menüsprache ist Deutsch`. The path label is `Pfad`. **6** is `Selbstverwaltung`, **7** is `Sprache`, and **9** is `Beenden`. The status line says `Hauptmenü`.
+
+![German main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-de.png)
+
+### `main-menu-ja.png`
+
+Japanese main menu. The line above the box says `メニューの言語は日本語`. The path label is `パス`. **6** is `自己管理`, **7** is `言語`, and **9** is `終了`. The status line says `メインメニュー`.
+
+![Japanese main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-ja.png)
+
+### `main-menu-ko.png`
+
+Korean main menu. The line above the box says `메뉴 언어는 한국어`. The path label is `경로`. **6** is `자기관리`, **7** is `언어`, and **9** is `종료`. The status line says `주 메뉴`.
+
+![Korean main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-ko.png)
+
+### `main-menu-nl.png`
+
+Dutch main menu. The line above the box says `De menutaal is Nederlands`. The path label is `Pad`. **6** is `zelfbeheer`, **7** is `taal`, and **9** is `Afsluiten`. The status line says `hoofdmenu`.
+
+![Dutch main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-nl.png)
+
+### `main-menu-el.png`
+
+Greek main menu. The line above the box says `Η γλώσσα του μενού είναι ελληνικά`. The path label is `Διαδρομή`. **6** is `αυτοδιαχείριση`, **7** is `γλώσσα`, and **9** is `Έξοδος`. The status line says `κύριο μενού`.
+
+![Greek main menu](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/main-menu-el.png)
+
+### `system-log.png`
+
+This AgentCli capture opened system-log from a typed token. **31 view-log** is highlighted: "list a log file and show it." Then **32 clear-log**, **33 log-folder**, and **0 Back**. The live RustAgent front board puts that same board on row **3**. The path label is `Path`. The status line on the capture says `system-log`.
+
+![System log, 31 view-log](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/system-log.png)
+
+### `self-management.png`
+
+This AgentCli capture opened self-management on pip rows **64**, **65**, **66**, and **68**. The live RustAgent board is cargo rows **62** version, **63** about, **64** version-check, **65** self-update, **66** self-uninstall, **67** self-install, **68** where-is-me, and **0** Back. The path label is `Path`. The status line on the capture says `self-management`.
+
+![Self-management, 64 version-check](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/self-management.png)
+
+### `grok-auth.png`
+
+**1 grok-auth** on a multi-user host while the session word is missing. The board shows **12 sync-auth-from-remote**, **13 sync-auth**, **14 add-crontab**, **15 setup**, **16 reinstall**, and **0 Back**. A signed-in session shows **11 backup** instead of the sync rows. The status line says `grok-auth`.
+
+![Logged-out grok-auth board](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/grok-auth.png)
+
+### `sudoers.png`
+
+Row **5** has opened sudoers. The rows are **51 generate-sudoer-request**, **52 submit-sudoer-request**, **53 print-sudoers**, **54 print-sudoers-install-script**, **55 remove-project-sudoers**, and **0 Back**. The grant argument is `backup` only. The status line says `sudoers`.
+
+![Sudoers board, backup grant only](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/sudoers.png)
+
+### `tui-about.png`
+
+This AgentCli capture is the about result page. It prints `AgentCli 1.2.0` and `Entry points: agent-cli, python -m AgentCli`. The live page prints `RustAgent 1.2.0`, `Domain: Install and run xAI grok, and back up its auth files.`, `Runtime tools: curl, grok`, and entry `rust-agent`. The host check is headed `[CHECK SYSTEM]:` and includes the cache lines. The footer says `Up/Down scrolls this page.` and `Press a key to return to the main menu.` There is no input box and no clock. The page stays in English.
+
+![About page with cache lines](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/tui-about.png)
 
 ## Examples
 
-```sh
-# Place xAI grok (TTY: keep / reinstall / Exit if already there)
-grok-cli setup
-grok-cli setup --force     # reinstall without the list
-grok-cli reinstall             # same fetch; also a start-list row
-grok-cli update-grok           # latest grok from x.ai (not grok auto-update)
-# open a new terminal if grok is not on this session PATH yet
-grok-cli run                   # Termux: start grok without auto-update
-# or: grok login
-
-# Optional: confirm grok actually answers, then share auth.* on this host
-grok-cli check-session    # runs grok -p hello first
-grok-cli backup
-
-# Another login on the same host, no sudo:
-grok-cli sync-auth
-
-# Pull the shared store from another host (openssh scp; no sudo):
-grok-cli sync-auth-from-remote user@192.0.2.10
-
-# Push this login's ~/.grok/auth.* onto that host's ~/.grok (no sudo):
-grok-cli sync-auth-to-remote user@192.0.2.10
-
-# After sudoer-adm approves THIS login's backup grant:
-grok-cli add-crontab
+```bash
+rust-agent
+rust-agent version
+rust-agent hello
+rust-agent about
+rust-agent setup
 ```
+
+`version` prints `RustAgent 1.2.0` and does not call cargo. A run that is not the text menu can also print status lines above that. The text menu keeps those lines off the screen.
+
+```bash
+rust-agent hello
+```
+
+That prints `Welcome to RustAgent 1.2.0.` and does not draw the menu.
 
 ## Platform Compatibility
 
-| Platform | Status |
-|----------|--------|
-| Linux, `/bin/sh` (dash/bash) | Supported |
-| Termux / Android userspace | Supported for **this installer** (`setup` smokes under `~/.grok/downloads`, honors `$PREFIX/bin`, does not require bash). Vendor `linux-aarch64` grok is often `ET_EXEC`; setup retries `TERMUX_EXEC_OPTOUT`, may `pkg install -y proot`, and may place a wrapper without patching the file. Missing `/etc/resolv.conf` is not an install failure — use `XAI_API_KEY` or a host with working DNS if login fails. **Not** official x.ai Termux support. Why `grok -p` can hang until Ctrl-Z: **Why grok under PRoot does not return to the shell** below. |
-| Git Bash / MSYS / Cygwin | Supported: `setup` maps `uname` to `windows-*`, fetches `grok-…-windows-….exe`, copies `~/.grok/bin/grok.exe` (no Developer Mode symlink). cmd.exe / PowerShell still need User PATH `%USERPROFILE%\.grok\bin`. |
-| `python3` (optional) | Used for leftover `auth.json` shape helper when present (session gate is `grok -p hello`) |
-| `sudo` + narrow sudoers | Required only for non-root `backup` into `/var/grok-cli` |
-| macOS | `setup` follows xAI’s Darwin/arch detect; GNU `date -d` / `stat -c` assumptions may differ for other verbs |
-| Windows PowerShell / cmd.exe | Official grok: `irm https://x.ai/cli/install.ps1 \| iex`. grok-cli `setup` is POSIX `sh` and does **not** replace that one-liner. |
-
-### How xAI grok is set up by host
-
-Studied from `https://x.ai/cli/install.sh` and `https://x.ai/cli/install.ps1`. grok-cli **does not run** those scripts; `setup` / `update-grok` replay the channel + artifact steps in POSIX `/bin/sh`.
-
-**One-liners**
-
-| Host | Official xAI | grok-cli |
-|------|----------------|----------|
-| Linux | `curl -fsSL https://x.ai/cli/install.sh \| bash` | `grok-cli setup` (same `linux-*` artifact; does **not** run `install.sh`) |
-| macOS | same `install.sh` | `grok-cli setup` (`macos-*`; Rosetta → aarch64) |
-| Windows PowerShell | `irm https://x.ai/cli/install.ps1 \| iex` | Not this POSIX `setup` |
-| Git Bash / MSYS / Cygwin | `install.sh` maps to **windows** and installs `.exe` | `grok-cli setup` (same `windows-*` `.exe`; copy `grok.exe`) |
-| WSL | `install.sh` → **linux** binary | `grok-cli setup` as Linux |
-| Termux | **Not intended** | `grok-cli setup` fetches **`linux-aarch64`**, smokes on the phone, often a **PRoot wrapper** |
-
-**Detect OS / arch / artifact**
-
-| Step | Linux `install.sh` | Termux grok-cli | PowerShell `install.ps1` | Git Bash grok-cli |
-|------|--------------------|-----------------|--------------------------|-------------------|
-| OS | `uname -s` Linux → `linux` | still Linux → **`linux`** | forced **Windows** | `MINGW*`/`MSYS*`/`CYGWIN*` → **`windows`** |
-| Arch | `uname -m` → `x86_64` / `aarch64` | same; refuse x86_64 file on an aarch64 phone | `PROCESSOR_ARCHITECTURE` | `uname -m` |
-| Artifact | `grok-{ver}-linux-{arch}` (`.zst` / `.gz` / raw) | same **linux** file | `grok-{ver}-windows-{arch}.exe` then without `.exe` | same **windows** `.exe` then uncompressed |
-| On disk | no `.exe`; `chmod +x` | same + optional POSIX **wrapper** | `grok.exe` / `agent.exe` **copy** | `grok.exe` / `agent.exe` **copy** |
-
-**Fetch / place / smoke**
-
-| Step | Linux `install.sh` | Termux grok-cli | PowerShell `install.ps1` | Git Bash grok-cli |
-|------|--------------------|-----------------|--------------------------|-------------------|
-| Transport | `curl` or `wget` | `curl`; HTTP status on fail | `Invoke-WebRequest` / `HttpWebRequest`; **TLS 1.2** | `curl` |
-| Channel | `https://x.ai/cli/{stable\|alpha\|enterprise}`; GCS fallback | same | same | same |
-| Place | `~/.grok/downloads` + `~/.grok/bin` **symlink** | same; wrapper if ET_EXEC | `%USERPROFILE%\.grok\` **copy** `.exe` | `~/.grok/` **copy** `.exe` |
-| Smoke `--version` | yes, before replace | yes, under `downloads` (not `/tmp`); Android retries + PRoot | **no** | **yes**, before replace |
-| Termux extras | none | DNS bind; `--no-auto-update` on `-p`; PRoot reaper | none | none (not Android) |
-
-**PATH**
-
-| Step | Linux `install.sh` | Termux grok-cli | PowerShell `install.ps1` | Git Bash grok-cli |
-|------|--------------------|-----------------|--------------------------|-------------------|
-| PATH now | symlink into `~/.local/bin` or `/usr/local/bin` if already on PATH | same + `${PREFIX}/bin` candidate | **User** `Path` + this session | **no** USER_BIN symlink (like official `install.sh` on windows) |
-| PATH later | `# >>> grok installer >>>` in bash/zsh/fish rc | bash `~/.bashrc`; zsh `~/.zshenv` and login `~/.zprofile` (not `.zshrc`) | User PATH (cmd + PowerShell) | bash `~/.bashrc` vendor block; zsh `~/.zshenv` and `~/.zprofile`; INFO for cmd/PowerShell User PATH |
-
-Then `grok login` or `XAI_API_KEY`. On Termux prefer `grok-cli run` and `grok-cli update-grok` instead of grok’s own updater.
-
-### Why grok under PRoot does not return to the shell
-
-**In one sentence:** on Termux, xAI’s `grok` often cannot run as a normal phone program, so `setup` starts it through **PRoot**; grok already printed and exited, but leftover Termux `runsvdir` (started by login-shell env capture) keep PRoot waiting — your shell looks frozen until **Ctrl-Z**.
-
-| Box | Meaning | Example |
-|-----|---------|---------|
-| You / this login | Type `grok -p hello` on Termux and expect the prompt back | `Hello. How can I help you today?` then `~ $` |
-| The other role | PRoot is a user-space trampoline (not real root, not a full Linux distro). It traces grok so a static Linux file can run on Android and can bind `~/.grok/resolv.conf` over `/etc/resolv.conf` | `pkg install proot` then `grok-cli setup` |
-| Not this | grok-cli’s numbered list refusing to close; a corrupt `self-update`; byte-patching grok | Choice **9** already exits; SHA-256 passing does not prove `grok -p` returns |
-
-| Includes | Excludes |
-|----------|----------|
-| What PRoot is; why grok-cli uses it; the causal chain of the `-p` hang; why Ctrl-C fails and Ctrl-Z works; what **1.8.22** does | Claiming official x.ai Termux support; editing vendor grok bytes; treating PRoot as `sudo` or as `proot-distro` |
-
-**What PRoot is.** PRoot (Ptrace ROOT) rewrites grok’s system calls with `ptrace`. It does **not** give you root. grok-cli uses it because the vendor `linux-aarch64` file is a static Linux executable (`ET_EXEC`). Android’s linker refuses that file (`unexpected e_type: 2`). Termux’s `/etc/resolv.conf` also has no `nameserver`, so musl inside grok fails DNS unless PRoot binds a file that does. The wrapper unsets `LD_PRELOAD` (termux-exec would re-hit `e_type` 2) and runs `proot` plus the **unmodified** vendor file.
-
-**Why `-p` does not exit.** Official grok `-p` is one-shot: print, then exit. On-device study (Termux aarch64, `proot` 5.1, `termux-services` + `runit`): `grok-linux` **does** `_exit` after the reply. `grok --help` under the **same** PRoot returns in ~0.3s — proof PRoot can exit when it has no leftover daemons. PRoot’s loop is `wait4(-1, …, __WALL)` (`wchan=do_wait`): it does not return until **every remaining tracee is dead**, including processes that later daemonize and reparent to PID 1. There is **no** `proot -r` rootfs; PRoot is only a syscall translator.
-
-The leftover processes are **not** grok helpers. During session init, grok starts **two login shells** to snapshot the user environment (`bash -lc 'source "$HOME/.bashrc"; …'`). Termux login shells source `$PREFIX/etc/profile`, which sources `profile.d/start-services.sh`, which runs `(service-daemon start &)` → `start-stop-daemon -S -b … runsvdir $SVDIR`. `-b` double-forks. On a normal Termux login that is what you want. **Under PRoot it is fatal:** the new `runsvdir` remains a tracee and lives forever as a supervisor. Two login shells ⇒ two extra `runsvdir` per `grok -p`. They race `$PREFIX/var/run/service-daemon.pid` and usually cannot see Termux’s already-running `runsvdir`, so they start extras instead of no-op’ing.
-
-**Causal chain**
-
-```text
-grok -p hello
-  → wrapper execs proot (no rootfs) over grok-linux-aarch64
-    → grok-linux starts two `bash -lc` env-capture processes
-      → bash -l sources $PREFIX/etc/profile
-        → profile.d/start-services.sh
-          → (service-daemon start &)
-            → start-stop-daemon -S -b … runsvdir $SVDIR
-              → runsvdir double-forks, PPID=1, STILL a PRoot tracee
-    → grok-linux prints the reply and _exit()s
-    → proot wait4(-1, __WALL)    # leftover runsvdir still alive
-      → grok -p never returns
-```
-
-Isolation (same PRoot flags as the wrapper: `proot -b ~/.grok/resolv.conf:/etc/resolv.conf <cmd>`):
-
-| Command | Result |
-|---------|--------|
-| `grok -p hello` | Reply prints; hang until SIGKILL; two leftover `runsvdir` |
-| `grok --help` | Exits in ~0.3s (no env-capture login shells) |
-| `proot … bash -lc 'echo LOGIN_OK'` | Hang — **does not need grok at all** |
-| `proot … bash -c 'echo NONLOGIN_OK'` | Exits at once |
-| `proot … bash --noprofile --norc -lc '…'` | Exits at once |
-| `env -u SVDIR grok -p hello` | Still hangs (`start-services.sh` re-exports `SVDIR`) |
-
-Matching leftovers by `ps -o comm=` never fires on Termux (`comm` truncates to `/data/data/com.`). Match **args / exe paths**. Do **not** kill Termux’s own `runsvdir` (sshd / ssh-agent live there). Nested PRoot deadlocks (`ptrace_stop`); do not debug this hang by launching `grok -p` from an agent already under grok’s PRoot.
-
-**Why Ctrl-C fails and Ctrl-Z works.** Ctrl-C is `SIGINT` — grok/PRoot often ignore it (or treat it as “cancel this turn”). Ctrl-Z is `SIGTSTP` — the shell’s job control, usually not caught — so you get `Stopped`. An old wrapper did `exec proot grok …`, so there was no parent left to SIGKILL.
-
-**What grok-cli does (1.8.25).** The wrapper binds `/dev/null` over `$PREFIX/etc/profile.d/start-services.sh` so those login shells do not spawn extra `runsvdir` (it does **not** edit Termux’s file). It still passes `proot --kill-on-exit` (never `-k`) and `--no-auto-update` on `-p`, and keeps a **PRoot-exit reaper** as the safety net: when grok-linux is gone (or stdout is idle, including empty stdout after guest death), kill only new `runsvdir`, then SIGKILL PRoot immediately. The reaper is in its own session (`setsid`) and ignores Ctrl-Z so the watchdog cannot be stopped with the menu. The numbered list prints `checking session (grok -p hello, timeout 14s)...` after the header. If that probe hits the bound, the next line is **timeout** (not **logged out**). Interactive `grok` still `exec`s so the TUI owns the terminal. `grok-cli setup` **and** `grok-cli self-update` rewrite a stale wrapper (no `--force`). After `self-update` to **1.8.25**:
-
-```sh
-grok-cli self-update  # also heals ~/.grok/bin/grok
-grok-cli run          # start grok without auto-update
-grok-cli run -p hello # must return to ~ $ without Ctrl-Z
-```
-
-`grep proot-exit-reaper ~/.grok/bin/grok` should match. grok-cli’s own menu (Choice **9**) was already closable in **1.8.14**; that bound only the menu probe, not operator-facing `grok`. On Termux the numbered list starts with **run**.
+Linux is the primary host. macOS and Windows work when Rust and cargo are present. `setup` selects `linux`, `macos`, or `windows`, and `x86_64` or `aarch64`. The text menu needs a terminal. Git Bash and Windows cmd are this-login-only: they show **run** and hide **sudoers**. Termux is detected from `TERMUX_VERSION` or a set `PREFIX`, unless `RUSTAGENT_HOST_OVERRIDE` is `multiuser`, `gitbash`, or `windows-cmd`.
 
 ## Related Projects
 
-- Official grok install: [x.ai](https://x.ai) — `curl -fsSL https://x.ai/cli/install.sh | bash`
-- [selfmanaged](https://github.com/cloudgen/selfmanaged) — online `curl\|sh` package specialized onto grok-cli
-- [folder-backup](https://github.com/cloudgen/folder-backup) — architecture parent (folder archive backup)
-- [CIAO Defensive Programming](https://github.com/cloudgen/ciao)
-- [CIAO-Lite](https://github.com/cloudgen/ciao-lite)
-- [cli-template](https://github.com/cloudgen/cli-template) — POSIX shell starter this product grew from (hop 0)
+- [RustAgent on GitHub](https://github.com/cloudgen/RustAgent) — this program’s source
+- [grok-cli](https://github.com/cloudgen/grok-cli) — POSIX reference this crate specializes beside
+- [CIAO](https://github.com/cloudgen/ciao) — Caution, Intentional, Anti-fragile, Over-engineered
+- [CIAO-Lite](https://github.com/cloudgen/ciao-lite) — short agent contract
+- [safe-rm](https://github.com/cloudgen/safe-rm) — guarded `rm`
 
 ## Contributing
 
-Keep changes surgical. Honor **CIAO-Lite Protection Zones** in `src/grok-cli`. Product behavior must stay consistent with live `docs/requirements/requirement-*.md`. Run `sh tests/run.sh` before proposing commits.
+1. Keep product law in `docs/requirements/` aligned with this document when behavior changes.
+2. Do not add `join`, `list-videos`, or an encoder. Those verbs stay unknown.
+3. Version dual SSOT: bump **`Cargo.toml`** `version` and **`src/identity.rs`** `VERSION` together.
+4. Do not widen the root path past `rust-agent backup`.
+5. Empty argv on a terminal opens the menu. Empty argv off a terminal prints help and returns 0.
 
 ## License
 
-MIT License — see [`LICENSE.md`](./LICENSE.md).
+MIT. See [LICENSE.md](LICENSE.md).
+
+Copyright (c) 2026 cloudgen.
 
 ## Last Update
 
-2026-10-12 — version **1.8.47**: shell startup files set PATH on the right file for each shell. A zsh login gets the line on `~/.zshenv` and `~/.zprofile`. A missing `.profile`, `.zshenv`, or `.zprofile` is created when that shell owns it. Bash-only does not invent the zsh files. Multi-user front is **1** grok-auth, **5** sudoers, **6** self-management, **7** language (**80** English through **92** Greek), **9** Exit. This-login-only lists **2** run and omits **5**. Front **8** is not a row. Full history: [`CHANGELOG.md`](./CHANGELOG.md).
+2026-10-22 — **1.2.0**. The ship unit is the Rust crate `rustagent`, binary `rust-agent`. Install is cargo. Front rows are **1 grok-auth**, **3 system-log**, **5 sudoers**, **6 self-management** (**62**–**68**), **7 language**, and **9 Exit**. Language codes are **80**–**92**. The leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process. The text picture above is the live menu. PNG files under Screenshots are earlier AgentCli captures. `submit-sudoer-request` queues a backup-only grant and does not write `/etc`.

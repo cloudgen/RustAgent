@@ -8,6 +8,8 @@
 
 Declare the **bootstrap chain** for this product: ordered lineage, direction, architecture inheritance, and the **domain retarget** from folder-archive backup onto grok auth backup/sync.
 
+Text-menu architecture for the Rust ship unit comes from sibling **HolaTui**. Direction is HolaTui → RustAgent only. Do not edit HolaTui. The domain parent remains this tree’s grok-cli law. The ship unit is the crate `rustagent`, not the Python package AgentCli.
+
 **Direction is sacred:** ancestor → descendant only. Never reverse-copy this product onto the bootstrap parent.
 
 ---
