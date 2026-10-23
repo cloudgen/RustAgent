@@ -9,19 +9,19 @@ pub struct LangCode {
 }
 
 pub const CODES: &[LangCode] = &[
-    LangCode { code: "en", endonym: "English", number: 80 },
-    LangCode { code: "zh-Hans", endonym: "简体中文", number: 81 },
-    LangCode { code: "zh-Hant", endonym: "繁體中文", number: 82 },
-    LangCode { code: "es", endonym: "Español", number: 83 },
-    LangCode { code: "ar", endonym: "العربية", number: 84 },
-    LangCode { code: "fr", endonym: "Français", number: 85 },
-    LangCode { code: "pt", endonym: "Português", number: 86 },
-    LangCode { code: "ru", endonym: "Русский", number: 87 },
-    LangCode { code: "de", endonym: "Deutsch", number: 88 },
-    LangCode { code: "ja", endonym: "日本語", number: 89 },
-    LangCode { code: "ko", endonym: "한국어", number: 90 },
-    LangCode { code: "nl", endonym: "Nederlands", number: 91 },
-    LangCode { code: "el", endonym: "Ελληνικά", number: 92 },
+    LangCode { code: "en", endonym: "English", number: 70 },
+    LangCode { code: "zh-Hans", endonym: "简体中文", number: 71 },
+    LangCode { code: "zh-Hant", endonym: "繁體中文", number: 72 },
+    LangCode { code: "es", endonym: "Español", number: 73 },
+    LangCode { code: "ar", endonym: "العربية", number: 74 },
+    LangCode { code: "fr", endonym: "Français", number: 75 },
+    LangCode { code: "pt", endonym: "Português", number: 76 },
+    LangCode { code: "ru", endonym: "Русский", number: 77 },
+    LangCode { code: "de", endonym: "Deutsch", number: 78 },
+    LangCode { code: "ja", endonym: "日本語", number: 79 },
+    LangCode { code: "ko", endonym: "한국어", number: 80 },
+    LangCode { code: "nl", endonym: "Nederlands", number: 81 },
+    LangCode { code: "el", endonym: "Ελληνικά", number: 82 },
 ];
 
 pub fn text(code: &str, key: &str) -> &'static str {

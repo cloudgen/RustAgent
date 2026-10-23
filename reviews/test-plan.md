@@ -2,9 +2,9 @@
 
 Maps **TP-*** coverage to `tests/`.  
 **Product proof:** `cargo test --offline -- --test-threads=1`  
-**Ship unit:** crate `rustagent` **1.2.0**, console `rust-agent`  
+**Ship unit:** crate `rustagent` **1.2.1**, console `rust-agent`  
 **POSIX reference suite:** `./tests/run.sh` against `src/grok-cli` (grok-cli **1.8.47**)  
-**Last plan update:** 2026-10-22
+**Last plan update:** 2026-10-23
 
 ## Rust ship unit (2026-10-22)
 
@@ -14,8 +14,9 @@ Same TP identity. The Rust suite does not renumber shell IDs. The Python files n
 |-------|--------|------------|--------|
 | TP-DOC-01 | README badge, headings, absolute screenshot URLs, row 3 in the text picture | `tests/docs.rs` | **have** |
 | TP-ABOUT-01..16 | About page domain sentence, runtime tools, Basic Usage `rust-agent` | `tests/contract.rs` | **have** |
-| TP-LANG-01 | Front row 7, codes 80–92, save, env override | `tests/contract.rs` | **have** |
+| TP-LANG-01 | Front row 7, codes 70–82, band 70–98, save, env override | `tests/contract.rs` | **have** |
 | TP-TUI-09..12 | Front 1/3/5/6/7/9, self 62–68, path label | `tests/contract.rs` | **have** |
+| TP-TUI-13 | Two-row unavailable notice. Even split. Next clock second shows the next page | `tests/contract.rs` | **have** |
 | TP-LC-43..46 | zsh `.zprofile` / `.zshenv`, bash does not invent zsh files, rc-test | `tests/startup.rs` | **have** |
 | TP-CLI-04 / TP-CLI-08 | Unknown `join`, `list-videos`, `restore` | `tests/domain.rs` | **have** |
 | TP-CLI-13 / TP-CLI-19 / TP-CLI-20 | Front rows, this-login-only hides sudoers, auth 11–16 | `tests/contract.rs`, `tests/domain.rs` | **have** |

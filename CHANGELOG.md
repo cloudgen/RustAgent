@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-10-23
+
+### Changed
+
+- **Language numbers.** The thirteen menu languages start at **70** English and end at **82** Greek. The language band is **70**–**98**. **83**–**98** stay unprinted. The POSIX file `src/grok-cli` keeps **80**–**92**. Law: `requirement-rust-cli-language` **1.3.0** · `requirement-rust-tui` **1.2.2**.
+- **Not-available notice.** Under the input box the menu keeps a two-row slot. Each unavailable sentence is split across those two rows. The next clock second shows the next sentence, or the next pair when one sentence still needs more than two rows, and the pages cycle until the full text has been shown. An empty notice list still adds no rows. Law: `requirement-rust-tui` **1.2.2**.
+
 ## [1.2.0] - 2026-10-22
 
 ### Added

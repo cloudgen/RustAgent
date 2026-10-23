@@ -2,13 +2,13 @@
 //! requirement-rust-packaging
 
 pub const APP_NAME: &str = "RustAgent";
-pub const VERSION: &str = "1.2.0";
+pub const VERSION: &str = "1.2.1";
 pub const CONSOLE_NAME: &str = "rust-agent";
 pub const CRATE_NAME: &str = "rustagent";
 pub const AUTHOR_NAME: &str = "cloudgen";
 pub const AUTHOR_EMAIL: &str = "wongcf22@gmail.com";
 pub const HOMEPAGE: &str = "https://github.com/cloudgen/RustAgent";
-pub const LAST_UPDATE: &str = "2026-10-22";
+pub const LAST_UPDATE: &str = "2026-10-23";
 pub const DOWNLOAD_URL: &str = "";
 pub const BASIC_USAGE: &str = "rust-agent";
 pub const LANG_ENV: &str = "RUSTAGENT_LANG";

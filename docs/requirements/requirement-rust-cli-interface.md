@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-rust-cli-interface.md
-**Status**: Active (Version 1.2.0)
+**Status**: Active (Version 1.2.1)
 **Area**: rust
 **Key**: `requirement-rust-cli-interface`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -22,9 +22,9 @@ This file owns the typed verbs and the decision to open the text menu. The menu 
 2. Product verbs **MUST** be `help`, `version`, `about`, `hello`, `menu`, `main`, `ensure`, `install`, `uninstall`, `rc-test`, `where-is-me`, `self-install`, `version-check`, `self-update`, `self-uninstall`, `setup`, `update-grok`, `reinstall`, `run`, `check-session`, `backup`, `sync-auth`, `sync-auth-from-remote`, `sync-auth-to-remote`, `add-crontab`, `print-sudoers`, `print-sudoers-install-script`, `remove-project-sudoers`, `generate-sudoer-request`, and `submit-sudoer-request`. `language`, `system-log`, and `Exit` are menu-only. **MUST NOT** add `join`, `list-videos`, or `restore`.
 3. On a terminal, empty argv **MUST** open the front board, return 0 when the person chooses Exit, and **MUST NOT** run cargo and **MUST NOT** download grok. With no terminal and no verb, the program **MUST** print help and return 0.
 4. `--json` with no verb, and `help` or `--help` when `--json` is set, **MUST** print JSON help (`type` `help`, `message` `rust-agent help`, `verbs` the product list) and **MUST NOT** open the menu.
-5. `hello` **MUST** print `Welcome to RustAgent 1.2.0.` and **MUST NOT** draw the menu.
-6. `version` and `--version` **MUST** print `RustAgent 1.2.0` and **MUST NOT** call cargo and **MUST NOT** draw the menu.
-7. On a terminal, `about`, `menu`, and `main` **MUST** open the text screen. Off a terminal, `about` **MUST** print the page and return 0. JSON about **MUST** use `type` `about`, the domain sentence as `message`, `name` `RustAgent`, and `version` `1.2.0`.
+5. `hello` **MUST** print `Welcome to RustAgent 1.2.1.` and **MUST NOT** draw the menu.
+6. `version` and `--version` **MUST** print `RustAgent 1.2.1` and **MUST NOT** call cargo and **MUST NOT** draw the menu.
+7. On a terminal, `about`, `menu`, and `main` **MUST** open the text screen. Off a terminal, `about` **MUST** print the page and return 0. JSON about **MUST** use `type` `about`, the domain sentence as `message`, `name` `RustAgent`, and `version` `1.2.1`.
 8. `version-check` runs `cargo search rustagent --limit 1`. `self-update` runs `cargo install rustagent --force`. `self-install` runs `cargo install rustagent`. `self-uninstall` runs `cargo uninstall rustagent` and on the command line **MUST** require `--force`. These verbs **MUST NOT** use sudo or pip.
 9. `--force` is accepted on `self-uninstall`, `uninstall`, `setup`, `reinstall`, and `remove-project-sudoers`. On any other verb the program **MUST** return non-zero with `--force is only for self-uninstall.` and **MUST NOT** run the verb.
 10. `run` **MUST** refuse `--json`. It **MUST** pass `--no-auto-update` unless the operator already passed that flag.

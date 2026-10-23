@@ -27,9 +27,9 @@ fn readme_matches_crate_version_and_menu() {
     let readme = fs::read_to_string(root.join("README.md")).expect("README");
     let cargo = fs::read_to_string(root.join("Cargo.toml")).expect("Cargo.toml");
     assert!(cargo.contains("name = \"rustagent\""));
-    assert!(cargo.contains("version = \"1.2.0\""));
-    assert_eq!(rustagent::identity::VERSION, "1.2.0");
-    assert!(readme.contains("Version-1.2.0-blue"));
+    assert!(cargo.contains("version = \"1.2.1\""));
+    assert_eq!(rustagent::identity::VERSION, "1.2.1");
+    assert!(readme.contains("Version-1.2.1-blue"));
     assert!(readme.contains("HH:MM:SS"));
     assert!(readme.contains("3. system-log"));
     assert!(readme.contains("~/.local/RustAgent"));

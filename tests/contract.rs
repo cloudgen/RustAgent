@@ -8,7 +8,7 @@ use rustagent::cli::{self, MemConsole};
 use rustagent::identity::{APP_NAME, CONSOLE_NAME, PRODUCT_VERBS, VERSION};
 use rustagent::language::MenuLanguage;
 use rustagent::model::{Action, Key, MenuModel};
-use rustagent::painter::{MenuPainter, PATH_LABEL_EN, PATH_LABEL_ZH_HANT};
+use rustagent::painter::{notice_lines, MenuPainter, PATH_LABEL_EN, PATH_LABEL_ZH_HANT};
 use rustagent::self_manage::SelfManage;
 use rustagent::session::MenuSession;
 use rustagent::width::display_width;
@@ -114,6 +114,67 @@ fn path_label_ignores_lang() {
 }
 
 #[test]
+fn unavailable_notice_uses_two_rows_and_swaps_on_the_clock() {
+    let mut painter = MenuPainter::new(None);
+    assert_eq!(painter.chrome_rows(), 4);
+    painter.unavailable = vec![
+        "backup features are not available for logged-out environment.".into(),
+    ];
+    assert_eq!(painter.chrome_rows(), 6);
+    painter.set_clock(Some("00:00:00".into()));
+    let wide = painter.notice_window(80);
+    assert_eq!(wide.len(), 2);
+    assert!(!wide[0].is_empty() && !wide[1].is_empty());
+    assert_eq!(
+        format!("{} {}", wide[0], wide[1]),
+        "backup features are not available for logged-out environment."
+    );
+    assert_eq!(painter.notice_window(80), wide);
+
+    let narrow_message =
+        "sync-auth and sync-auth-from-remote features are not available for logged-in environment.";
+    let width = 24usize;
+    let wrapped = notice_lines(narrow_message, width);
+    assert!(wrapped.len() > 2, "{wrapped:?}");
+    painter.unavailable = vec![narrow_message.to_string()];
+    let pages = wrapped.len().div_ceil(2);
+    let mut shown = Vec::new();
+    for second in 0..pages {
+        painter.set_clock(Some(format!("00:00:{second:02}")));
+        let page = painter.notice_window(width);
+        assert_eq!(page.len(), 2);
+        shown.extend(page);
+    }
+    while shown.last().is_some_and(|line| line.is_empty()) {
+        shown.pop();
+    }
+    assert_eq!(shown, wrapped);
+    assert_eq!(shown.join(" "), narrow_message);
+    painter.set_clock(Some(format!("00:00:{pages:02}")));
+    assert_eq!(painter.notice_window(width)[0], wrapped[0]);
+
+    painter.unavailable = vec![
+        "backup, sync-auth and sudoers features are not available in termux.".into(),
+        "backup features are not available for logged-out environment.".into(),
+    ];
+    painter.set_clock(Some("00:00:00".into()));
+    let first = painter.notice_window(80);
+    painter.set_clock(Some("00:00:01".into()));
+    let second = painter.notice_window(80);
+    assert_ne!(first, second);
+    assert_eq!(
+        format!("{} {}", first[0], first[1]),
+        "backup, sync-auth and sudoers features are not available in termux."
+    );
+    assert_eq!(
+        format!("{} {}", second[0], second[1]),
+        "backup features are not available for logged-out environment."
+    );
+    painter.set_clock(Some("00:00:02".into()));
+    assert_eq!(painter.notice_window(80), first);
+}
+
+#[test]
 fn wide_columns_count_east_asian_width() {
     assert_eq!(MenuPainter::display_width("╭─╮"), 3);
     assert_eq!(MenuPainter::display_width("█"), 1);
@@ -154,10 +215,11 @@ fn language_leaf_round_trip() {
     assert_eq!(self_rows[6].kind, "where-is-me");
     let lang_rows = painter.borrow().display_rows("lang");
     let printed: Vec<i32> = lang_rows.iter().map(|row| row.number).collect();
-    assert_eq!(&printed[..13], &(80..=92).collect::<Vec<_>>());
+    assert_eq!(&printed[..13], &(70..=82).collect::<Vec<_>>());
     assert_eq!(*printed.last().unwrap(), 0);
-    assert!(!printed.contains(&79));
-    assert!(!printed.contains(&93));
+    assert!(!printed.contains(&69));
+    assert!(!printed.contains(&83));
+    assert!(!printed.contains(&98));
     assert_eq!(lang_rows[0].short, "English");
     assert_eq!(lang_rows[2].short, "繁體中文");
     assert_eq!(lang_rows[lang_rows.len() - 2].short, "Ελληνικά");
@@ -167,7 +229,7 @@ fn language_leaf_round_trip() {
     model.focus = rustagent::model::Focus::Input;
     assert_eq!(model.apply_key(Key::Enter, 24), Action::Stay);
     assert_eq!(model.layer, "lang");
-    model.buffer = "82".into();
+    model.buffer = "72".into();
     model.cursor = 2;
     let action = model.apply_key(Key::Enter, 24);
     assert_eq!(action, Action::Kind("set-zh-Hant".into()));
@@ -269,8 +331,8 @@ fn about_page_identity_stays_english() {
 #[test]
 fn version_matches_cargo_manifest() {
     let manifest = fs::read_to_string("Cargo.toml").unwrap();
-    assert!(manifest.contains("version = \"1.2.0\""));
-    assert_eq!(VERSION, "1.2.0");
+    assert!(manifest.contains("version = \"1.2.1\""));
+    assert_eq!(VERSION, "1.2.1");
     let mut console = MemConsole::default();
     assert_eq!(cli::run(&["version".into()], &mut console, Some("/tmp"), Some("/tmp")), 0);
     assert_eq!(console.out, format!("{APP_NAME} {VERSION}\n"));

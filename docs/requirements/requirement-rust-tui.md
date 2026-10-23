@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-rust-tui.md
-**Status**: Active (Version 1.2.0)
+**Status**: Active (Version 1.2.2)
 **Area**: rust
 **Key**: `requirement-rust-tui`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -29,11 +29,11 @@ Typed verbs stay on `requirement-rust-cli-interface`. Domain procedures stay on 
 7. system-log rows **MUST** be **31** view-log, **32** clear-log, **33** log-folder, and **0** Back. Choosing a row runs that verb and shows a result page. Esc on a nested board returns to the front board and is not row **9** Exit.
 8. Cargo rows **MUST** run `cargo search rustagent --limit 1`, `cargo install rustagent --force`, `cargo uninstall rustagent`, and `cargo install rustagent`. They **MUST NOT** use sudo or pip. Choosing **66** is the menu confirmation. Command-line `self-uninstall` still needs `--force` (`requirement-rust-cli-interface`).
 9. The first row **MUST** be `<label>: <absolute cwd>` with the clock `HH:MM:SS` on the right when the row has room. English label is `Path`. Traditional Chinese label is `路徑`. The path and the clock are not translated. The one-second clock wait applies on front, self, log, lang, auth, and sudo. It **MUST NOT** be read as Esc. Result pages, the view-log list, the clear confirm, the remote SPEC prompt, and the setup keep/reinstall prompt use a blocking read.
-10. The bottom **MUST** be a three-row box using `╭` `╮` `╰` `╯` `─` `│` and caret `█`, then the unavailable lines, then the status line `  RustAgent <version>  │  <title>  │  Up/Down  •  Enter`. ASCII `+` `-` `|` and sharp corners **MUST NOT** stand in for the arcs.
-11. Unavailable lines **MUST** be: host `backup, sync-auth and sudoers features are not available in {label}.`; logged-out `backup features are not available for logged-out environment.`; logged-in `sync-auth and sync-auth-from-remote features are not available for logged-in environment.`
+10. The bottom **MUST** be a three-row box using `╭` `╮` `╰` `╯` `─` `│` and caret `█`, then a two-row notice when any unavailable sentence is present, then the status line `  RustAgent <version>  │  <title>  │  Up/Down  •  Enter`. ASCII `+` `-` `|` and sharp corners **MUST NOT** stand in for the arcs. The notice slot **MUST** stay two rows. It **MUST NOT** grow by one row per sentence.
+11. Unavailable sentences **MUST** stay: host `backup, sync-auth and sudoers features are not available in {label}.`; logged-out `backup features are not available for logged-out environment.`; logged-in `sync-auth and sync-auth-from-remote features are not available for logged-in environment.` Each sentence **MUST** be laid out on the two rows, split on word boundaries so the two rows are as even as display columns allow. When a sentence still needs more than two rows, the extra rows are later pages of that sentence. A second sentence is the next page. The menu **MUST** advance to the next page when the clock second changes, and **MUST** cycle so the full text of every sentence is shown. The same clock second **MUST** keep the same page.
 12. Domain leaf shorts stay English. Chrome shorts (language, system-log, self-management, Exit, Back) may follow the selected language.
-13. A window that cannot hold the path line, one numbered row, the three-row box, the unavailable lines, and the status line **MUST** fail closed with `The text screen is too small for the menu and the input box.` and **MUST NOT** fall back to a `Choice:` line. Control-C restores the terminal and returns 130.
-14. Default `MenuPainter::new` is multi-user and logged out, with no unavailable lines, so an empty notice list still fits the HolaTui chrome until the host and session are bound.
+13. A window that cannot hold the path line, one numbered row, the three-row box, the two-row notice when sentences are present, and the status line **MUST** fail closed with `The text screen is too small for the menu and the input box.` and **MUST NOT** fall back to a `Choice:` line. Control-C restores the terminal and returns 130.
+14. Default `MenuPainter::new` is multi-user and logged out, with no unavailable lines, so an empty notice list adds zero notice rows and still fits the HolaTui chrome until the host and session are bound. A non-empty list adds exactly two notice rows.
 
 ## 3. Acceptance
 
@@ -41,5 +41,6 @@ Typed verbs stay on `requirement-rust-cli-interface`. Domain procedures stay on 
 |----|-----------|
 | AC-1 | Front numbers on the default painter are 1, 3, 5, 6, 7, 9 and row 1 is grok-auth |
 | AC-2 | Self numbers are 62, 63, 64, 65, 66, 67, 68, 0 |
-| AC-3 | Language row 7 uses codes 80–92 |
+| AC-3 | Language row 7 uses codes 70–82 inside band 70–98 |
 | AC-4 | The input box uses the arc glyphs and the status line names RustAgent |
+| AC-5 | A non-empty unavailable list uses exactly two notice rows and advances when the clock second changes |

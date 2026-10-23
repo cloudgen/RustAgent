@@ -1,6 +1,6 @@
 [package]
 name = "rustagent"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 description = "RustAgent installs and runs xAI grok, and backs up its auth files."
 license = "MIT"

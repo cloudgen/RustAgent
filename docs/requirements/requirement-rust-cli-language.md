@@ -1,12 +1,12 @@
 **file**: docs/requirements/requirement-rust-cli-language.md
-**Status**: Active (Version 1.2.0)
+**Status**: Active (Version 1.3.0)
 **Area**: rust
 **Key**: `requirement-rust-cli-language`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
 
-Menu language for RustAgent. Thirteen languages. Front row **7**. Codes **80**–**92**. HolaTui’s codes **71**–**83** are not this product’s numbers.
+Menu language for RustAgent. Thirteen languages. Front row **7**. Assigned codes **70**–**82**. The language band is **70**–**98**.
 
 ### 1.1 Human-facing
 
@@ -14,12 +14,12 @@ Menu language for RustAgent. Thirteen languages. Front row **7**. Codes **80**�
 
 | You | Another role | Not this |
 |-----|--------------|----------|
-| Pick **80** English through **92** Greek | Leaf tokens such as `grok-auth` stay English | An argv verb named `language`, or reading `LANG` |
+| Pick **70** English through **82** Greek | Leaf tokens such as `grok-auth` stay English | An argv verb named `language`, or reading `LANG` |
 
 ## 2. Core Rules
 
-1. Codes **MUST** be `en` 80, `zh-Hans` 81, `zh-Hant` 82, `es` 83, `ar` 84, `fr` 85, `pt` 86, `ru` 87, `de` 88, `ja` 89, `ko` 90, `nl` 91, `el` 92.
-2. **70**–**79** and **93**–**98** **MUST NOT** be printed. Typing a reserved number **MUST NOT** write the leaf.
+1. Codes **MUST** be `en` 70, `zh-Hans` 71, `zh-Hant` 72, `es` 73, `ar` 74, `fr` 75, `pt` 76, `ru` 77, `de` 78, `ja` 79, `ko` 80, `nl` 81, `el` 82.
+2. The language band **MUST** be **70**–**98**. **83**–**98** **MUST NOT** be printed. Typing a number in that reserved span **MUST NOT** write the leaf.
 3. The saved leaf **MUST** be `${HOME}/.local/RustAgent/language`. The directory **MUST** be mode `0700`. The file **MUST** be mode `0600`. The program reads the first line only.
 4. `RUSTAGENT_LANG` **MUST** override one process when it is one of the thirteen codes and **MUST NOT** write the file. `LANG`, `LANGUAGE`, `LC_ALL`, and `LC_MESSAGES` **MUST NOT** select a code.
 5. **0** Back and Esc **MUST NOT** write. A failed write **MUST** keep the previous code and **MUST** still return to the front board.
@@ -32,7 +32,7 @@ Menu language for RustAgent. Thirteen languages. Front row **7**. Codes **80**�
 
 | AC | Statement |
 |----|-----------|
-| AC-1 | Row 7 lists 80–92 and not 79 or 93 |
-| AC-2 | Saving `82` writes `zh-Hant` at mode 0600 and Back does not write |
+| AC-1 | Row 7 lists 70–82 and not 69 or 83 |
+| AC-2 | Saving `72` writes `zh-Hant` at mode 0600 and Back does not write |
 | AC-3 | After that save, `grok-auth` stays English and the self-management explain names cargo in Traditional Chinese |
 | AC-4 | `RUSTAGENT_LANG` wins and does not write |

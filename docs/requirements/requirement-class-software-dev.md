@@ -1,7 +1,7 @@
 **file**: docs/requirements/requirement-class-software-dev.md  
-**Status**: Active (Version 1.3.9 – ship unit is the Rust crate rustagent; shell family remains behavior law)  
+**Status**: Active (Version 1.3.10 – ship unit is the Rust crate rustagent; shell family remains behavior law)  
 
-> Ship unit (2026-10-22): primary language is Rust 2021. Crate **rustagent**. Console binary **`rust-agent`**. Display name **RustAgent**. Version **1.2.0** in `Cargo.toml` and `src/identity.rs`. Bootstrap parent for the text menu is sibling HolaTui. Do not edit HolaTui. Do not reverse-copy this tree onto HolaTui. Domain behavior is `requirement-domain-grok-cli`. `src/grok-cli` remains the POSIX behavior reference and is not the install story. The install story for this package is cargo. The live menu is `requirement-rust-tui`: HolaTui frame, path line, local clock, system-log on front row **3**, cargo self-management rows **62**–**68**, language codes **80**–**92**, plus the grok-auth, sudoers, and this-login-only **run** rows.
+> Ship unit (2026-10-23): primary language is Rust 2021. Crate **rustagent**. Console binary **`rust-agent`**. Display name **RustAgent**. Version **1.2.1** in `Cargo.toml` and `src/identity.rs`. Bootstrap parent for the text menu is sibling HolaTui. Do not edit HolaTui. Do not reverse-copy this tree onto HolaTui. Domain behavior is `requirement-domain-grok-cli`. `src/grok-cli` remains the POSIX behavior reference and is not the install story. The install story for this package is cargo. The live menu is `requirement-rust-tui`: HolaTui frame, path line, local clock, system-log on front row **3**, cargo self-management rows **62**–**68**, language codes **70**–**82** inside band **70**–**98**, a two-row unavailable notice that advances on the clock second, plus the grok-auth, sudoers, and this-login-only **run** rows.
 **Area**: class  
 **Key**: `requirement-class-software-dev`  
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (CIAO = Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -137,7 +137,7 @@ A **lockfile** is a frozen list of dependency versions.
 | **Architectures supported** | any architecture with POSIX sh and the external tools the script uses |
 | **Git surface** | used when the product is published |
 | **Ship unit / install** | yes — the **ship unit** is the Rust crate `rustagent`, binary `rust-agent`. Install with `cargo install rustagent` or `cargo install --path .`. No sudo. `src/grok-cli` is not this package’s installer |
-| **Product version SSOT** | `Cargo.toml` `version` and `src/identity.rs` `VERSION`, both **1.2.0** |
+| **Product version SSOT** | `Cargo.toml` `version` and `src/identity.rs` `VERSION`, both **1.2.1** |
 | **Bootstrap origin** | HolaTui (text menu) plus this tree’s grok-cli domain law. Do not edit HolaTui. Do not reverse-copy RustAgent onto HolaTui |
 
 **Leftover-ownership table** (who owns each topic):
@@ -284,9 +284,10 @@ A **lockfile** is a frozen list of dependency versions.
 | 2026-09-17 | Active (1.3.5) | Leftover: zsh PATH → `requirement-shell-zshenv` (`.zshenv`, not `.zshrc`) |
 | 2026-09-22 | Active (1.3.6) | Leftover: ash / Alpine PATH → `requirement-shell-alpine` (`.profile` when `$0` is ash) |
 | 2026-10-12 | Active (1.3.7) | Leftover: shell startup files → `requirement-shell-startup-files` |
+| 2026-10-23 | Active (1.3.10) | Live menu language codes are **70**–**82** inside band **70**–**98**. Product version SSOT is **1.2.1**. Unavailable sentences use a two-row notice |
 
 ---
 
-**Last Updated**: 2026-10-12  
+**Last Updated**: 2026-10-23  
 **Owner**: project maintainers  
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

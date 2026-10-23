@@ -1,6 +1,6 @@
 # RustAgent - Install and run xAI grok, and back up its auth files
 
-[![Version](https://img.shields.io/badge/Version-1.2.0-blue?style=flat-square)](https://github.com/cloudgen/RustAgent)
+[![Version](https://img.shields.io/badge/Version-1.2.1-blue?style=flat-square)](https://github.com/cloudgen/RustAgent)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE.md)
 [![CIAO](https://img.shields.io/badge/CIAO-Defensive%20Programming-orange?style=flat-square)](https://github.com/cloudgen/ciao)
 [![Stars](https://img.shields.io/github/stars/cloudgen/RustAgent?style=flat-square)](https://github.com/cloudgen/RustAgent)
@@ -14,15 +14,16 @@ RustAgent installs and runs the peer binary `grok`, and it backs up `~/.grok` au
 - On a terminal with no arguments, the text menu opens. The first row names the current directory on the left and a local clock (`HH:MM:SS`) on the right when the row has room.
 - Multi-user front rows are **1 grok-auth**, **3 system-log**, **5 sudoers**, **6 self-management**, **7 language**, and **9 Exit**. A this-login-only host shows **2 run** and hides **5**. **4** and **8** are not rows.
 - **grok-auth** covers session, backup, sync, crontab, setup, and reinstall. **sudoers** covers the backup grant only. **system-log** covers view, clear, and the log folder.
-- Thirteen menu languages, codes **80**–**92**. **70**–**79** and **93**–**98** stay unprinted so a later language can be added. The saved leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process and does not write the file. `language` is not a typed verb.
+- Thirteen menu languages, codes **70**–**82**. The language band is **70**–**98**. **83**–**98** stay unprinted so a later language can be added. The saved leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process and does not write the file. `language` is not a typed verb.
+- When backup, sync, or sudoers is unavailable, a two-row notice sits under the input box. Each sentence is split across those two rows. The next clock second shows the next sentence, or the next pair when one sentence needs more than two rows. An empty notice list adds no rows.
 - **about** stays in English. It prints the domain line, the runtime tools, a host check, the cache tiers, and the persistence folder.
 - Cargo lifecycle: `version-check`, `self-update`, `self-install`, and `self-uninstall`. Those verbs do not use sudo. `self-uninstall` on the command line needs `--force`.
 - Empty arguments on a terminal do not run cargo and do not download `grok`. With no terminal and no verb, the program prints help and returns 0.
 
 ## Advantages
 
-1. **Two ways to do the work.** A menu number and the same typed verb share one action. `rust-agent hello` prints `Welcome to RustAgent 1.2.0.` and does not draw the menu. With no arguments on a terminal, the text menu opens and waits. With no terminal and no verb, the program prints help and returns 0.
-2. **Built-in languages.** Row **7** lists thirteen languages. The numbers are **80** through **92**. **70** through **79** and **93** through **98** stay unprinted so a later language can be added. The choice is saved for the next run. Leaf shorts stay English.
+1. **Two ways to do the work.** A menu number and the same typed verb share one action. `rust-agent hello` prints `Welcome to RustAgent 1.2.1.` and does not draw the menu. With no arguments on a terminal, the text menu opens and waits. With no terminal and no verb, the program prints help and returns 0.
+2. **Built-in languages.** Row **7** lists thirteen languages. The numbers are **70** through **82**. The language band is **70** through **98**. **83** through **98** stay unprinted so a later language can be added. The choice is saved for the next run. Leaf shorts stay English.
 3. **Cache and persistence.** Linux prefers `/dev/shm/cache`, then `/tmp/cache`, then a leaf under the home cache directory. A missed tier is silent. Persistence is `~/.local/RustAgent`. The about page names the tier this process selected.
 4. **A narrow root path.** The only elevated action is `rust-agent backup`, and only after an administrator installs a sudoers fragment whose argument is `backup`. Other verbs stay this login. Peer `grok` is fetched by `setup` from the vendor channel, then the public fallback. This package does not run a vendor shell installer.
 
@@ -32,7 +33,7 @@ RustAgent installs and runs the peer binary `grok`, and it backs up `~/.grok` au
 | Welcome line | `rust-agent hello` | not a front row |
 | Peer binary | `rust-agent setup` | grok-auth row **15** |
 | Auth deposit | `rust-agent backup` | grok-auth row **11** when signed in |
-| Menu language | not a verb | row **7**, codes **80**–**92** |
+| Menu language | not a verb | row **7**, codes **70**–**82**, band **70**–**98** |
 | System log | not a verb | front row **3**, then **31**–**33** |
 | This computer | `rust-agent about` | self-management row **63** |
 | Cargo lifecycle | `version-check`, `self-update`, `self-install`, `self-uninstall` | rows **64**, **65**, **66**, and **67**. **62** is version. **68** is `where-is-me` |
@@ -45,7 +46,7 @@ RustAgent installs and runs the peer binary `grok`, and it backs up `~/.grok` au
 cargo install rustagent
 ```
 
-This installs the console entry **`rust-agent`**. The crate name is `rustagent`. This tree is **1.2.0**. Nothing in this tree uploads a release by itself.
+This installs the console entry **`rust-agent`**. The crate name is `rustagent`. This tree is **1.2.1**. Nothing in this tree uploads a release by itself.
 
 From a checkout of the public repository [github.com/cloudgen/RustAgent](https://github.com/cloudgen/RustAgent):
 
@@ -75,7 +76,7 @@ Path: <current directory>                                          HH:MM:SS
 ╭──────────────╮
 │ > █          │
 ╰──────────────╯
-  RustAgent 1.2.0  │  main menu  │  Up/Down  •  Enter
+  RustAgent 1.2.1  │  main menu  │  Up/Down  •  Enter
 ```
 
 ## Usage
@@ -105,7 +106,7 @@ rust-agent self-install
 rust-agent self-uninstall --force
 ```
 
-`version` prints `RustAgent 1.2.0` and does not call cargo. `about` shows one English page: the product identity, a host check of this computer, the cache tiers, the persistence folder, and a star box. Basic Usage on that page is `rust-agent`. It does not call cargo. `hello` prints `Welcome to RustAgent 1.2.0.` and does not draw the menu. `help` prints usage.
+`version` prints `RustAgent 1.2.1` and does not call cargo. `about` shows one English page: the product identity, a host check of this computer, the cache tiers, the persistence folder, and a star box. Basic Usage on that page is `rust-agent`. It does not call cargo. `hello` prints `Welcome to RustAgent 1.2.1.` and does not draw the menu. `help` prints usage.
 
 `setup` downloads peer `grok` for this platform and links `~/.grok/bin/grok`. `backup` copies `auth.*` into `/var/rust-agent` when this login may run that one command as root. `sync-auth` copies the deposit back and skips that copy when grok is already signed in. `add-crontab` stays closed until the backup grant is present.
 
@@ -115,11 +116,11 @@ rust-agent self-uninstall --force
 
 ## Screenshots
 
-The fenced picture under Quick Installation is the live menu: front row **3** is system-log, and the status line is `RustAgent 1.2.0`. The PNG files below are earlier AgentCli captures. They still show `AgentCli` on the status line. They do not show RustAgent 1.2.0. On those captures the path is `/tmp/agent-cli-shots` and the clock is `12:06:45`. Leaf shorts stay English. **1 grok-auth** is highlighted on each main-menu capture.
+The fenced picture under Quick Installation is the live menu: front row **3** is system-log, and the status line is `RustAgent 1.2.1`. The PNG files below are earlier AgentCli captures. They still show `AgentCli` on the status line. They do not show RustAgent 1.2.1. On those captures the path is `/tmp/agent-cli-shots` and the clock is `12:06:45`. Leaf shorts stay English. **1 grok-auth** is highlighted on each main-menu capture.
 
 ### `language-menu.png`
 
-Row **7** has opened the language list. **80 English** is highlighted, with the note "use English for this menu." The other rows are **81 简体中文**, **82 繁體中文**, **83 Español**, **84 العربية**, **85 Français**, **86 Português**, **87 Русский**, **88 Deutsch**, **89 日本語**, **90 한국어**, **91 Nederlands**, and **92 Ελληνικά**. Each note says to use that language for this menu. **0 Back** says "return to the main menu." The path label is `Path`. The status line says `language`.
+Row **7** has opened the language list. This AgentCli capture highlights **80 English**, with the note "use English for this menu." The other rows on the capture are **81 简体中文**, **82 繁體中文**, **83 Español**, **84 العربية**, **85 Français**, **86 Português**, **87 Русский**, **88 Deutsch**, **89 日本語**, **90 한국어**, **91 Nederlands**, and **92 Ελληνικά**. The live RustAgent list is **70** English through **82** Ελληνικά. **83** through **98** stay unprinted. Each note says to use that language for this menu. **0 Back** says "return to the main menu." The path label is `Path`. The status line says `language`.
 
 ![Language list, 80 English highlighted](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/language-menu.png)
 
@@ -227,7 +228,7 @@ Row **5** has opened sudoers. The rows are **51 generate-sudoer-request**, **52 
 
 ### `tui-about.png`
 
-This AgentCli capture is the about result page. It prints `AgentCli 1.2.0` and `Entry points: agent-cli, python -m AgentCli`. The live page prints `RustAgent 1.2.0`, `Domain: Install and run xAI grok, and back up its auth files.`, `Runtime tools: curl, grok`, and entry `rust-agent`. The host check is headed `[CHECK SYSTEM]:` and includes the cache lines. The footer says `Up/Down scrolls this page.` and `Press a key to return to the main menu.` There is no input box and no clock. The page stays in English.
+This AgentCli capture is the about result page. It prints `AgentCli 1.2.0` and `Entry points: agent-cli, python -m AgentCli`. The live page prints `RustAgent 1.2.1`, `Domain: Install and run xAI grok, and back up its auth files.`, `Runtime tools: curl, grok`, and entry `rust-agent`. The host check is headed `[CHECK SYSTEM]:` and includes the cache lines. The footer says `Up/Down scrolls this page.` and `Press a key to return to the main menu.` There is no input box and no clock. The page stays in English.
 
 ![About page with cache lines](https://raw.githubusercontent.com/cloudgen/agent-cli/main/screenshots/tui-about.png)
 
@@ -241,13 +242,13 @@ rust-agent about
 rust-agent setup
 ```
 
-`version` prints `RustAgent 1.2.0` and does not call cargo. A run that is not the text menu can also print status lines above that. The text menu keeps those lines off the screen.
+`version` prints `RustAgent 1.2.1` and does not call cargo. A run that is not the text menu can also print status lines above that. The text menu keeps those lines off the screen.
 
 ```bash
 rust-agent hello
 ```
 
-That prints `Welcome to RustAgent 1.2.0.` and does not draw the menu.
+That prints `Welcome to RustAgent 1.2.1.` and does not draw the menu.
 
 ## Platform Compatibility
 
@@ -277,4 +278,4 @@ Copyright (c) 2026 cloudgen.
 
 ## Last Update
 
-2026-10-22 — **1.2.0**. The ship unit is the Rust crate `rustagent`, binary `rust-agent`. Install is cargo. Front rows are **1 grok-auth**, **3 system-log**, **5 sudoers**, **6 self-management** (**62**–**68**), **7 language**, and **9 Exit**. Language codes are **80**–**92**. The leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process. The text picture above is the live menu. PNG files under Screenshots are earlier AgentCli captures. `submit-sudoer-request` queues a backup-only grant and does not write `/etc`.
+2026-10-23 — **1.2.1**. Language codes are **70**–**82** inside band **70**–**98**. The POSIX file `src/grok-cli` keeps **80**–**92**. Unavailable sentences use a two-row notice under the input box and advance when the clock second changes. The ship unit is the Rust crate `rustagent`, binary `rust-agent`. Install is cargo. Front rows are **1 grok-auth**, **3 system-log**, **5 sudoers**, **6 self-management** (**62**–**68**), **7 language**, and **9 Exit**. The leaf is `~/.local/RustAgent/language`. `RUSTAGENT_LANG` overrides one process. The text picture above is the live menu. PNG files under Screenshots are earlier AgentCli captures.

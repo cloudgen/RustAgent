@@ -25,6 +25,7 @@ pub const FRAME_VERT: &str = "│";
 pub const CARET_BLOCK: &str = "█";
 pub const FRAME_ROWS: u16 = 3;
 pub const FOOTER_ROWS: u16 = 1;
+pub const NOTICE_ROWS: usize = 2;
 pub const CHROME_ROWS: u16 = FRAME_ROWS + FOOTER_ROWS;
 pub const MIN_MENU_ABOVE: u16 = 3;
 pub const MIN_HEIGHT: u16 = MIN_MENU_ABOVE + CHROME_ROWS;
@@ -139,8 +140,39 @@ impl MenuPainter {
         }
     }
 
+    pub fn notice_rows(&self) -> u16 {
+        if self.unavailable.is_empty() {
+            0
+        } else {
+            NOTICE_ROWS as u16
+        }
+    }
+
     pub fn chrome_rows(&self) -> u16 {
-        FRAME_ROWS + FOOTER_ROWS + self.unavailable.len() as u16
+        FRAME_ROWS + FOOTER_ROWS + self.notice_rows()
+    }
+
+    pub fn notice_window(&self, columns: usize) -> Vec<String> {
+        if self.unavailable.is_empty() {
+            return Vec::new();
+        }
+        let pages = notice_pages(&self.unavailable, columns.max(1));
+        if pages.is_empty() {
+            return vec![String::new(); NOTICE_ROWS];
+        }
+        let index = (self.clock_second() as usize) % pages.len();
+        pages[index].clone()
+    }
+
+    fn clock_second(&self) -> u64 {
+        let clock = self.clock_text();
+        let Some(field) = clock.rsplit(':').next() else {
+            return 0;
+        };
+        if field.is_empty() || !field.bytes().all(|byte| byte.is_ascii_digit()) {
+            return 0;
+        }
+        field.parse().unwrap_or(0)
     }
 
     pub fn screen_can_hold_here(&self, height: u16, width: u16) -> bool {
@@ -528,8 +560,8 @@ impl MenuPainter {
             self.put(screen, top + offset as u16, 0, line, Style::default(), width);
         }
         let mut y = top + FRAME_ROWS;
-        for line in &self.unavailable {
-            self.put(screen, y, 0, line, Style::default(), width);
+        for line in self.notice_window(width as usize) {
+            self.put(screen, y, 0, &line, Style::default(), width);
             y += 1;
         }
         self.put(
@@ -624,6 +656,107 @@ pub fn visible_lines(lines: &[String], room: usize, pin_last: bool) -> Vec<Strin
     out.push("…".to_string());
     out.push(lines[lines.len() - 1].clone());
     out
+}
+
+pub fn wrap_columns(text: &str, columns: usize) -> Vec<String> {
+    let text = text.trim();
+    if text.is_empty() || columns == 0 {
+        return Vec::new();
+    }
+    let mut lines: Vec<String> = Vec::new();
+    let mut line = String::new();
+    let mut line_width = 0usize;
+    for word in text.split_whitespace() {
+        let word_width = display_width(word);
+        if word_width > columns {
+            if !line.is_empty() {
+                lines.push(std::mem::take(&mut line));
+                line_width = 0;
+            }
+            let mut rest = word;
+            while !rest.is_empty() {
+                if display_width(rest) <= columns {
+                    line = rest.to_string();
+                    line_width = display_width(rest);
+                    break;
+                }
+                let head = clip_columns(rest, columns);
+                if head.is_empty() {
+                    let mut chars = rest.chars();
+                    chars.next();
+                    rest = chars.as_str();
+                    continue;
+                }
+                lines.push(head.clone());
+                rest = &rest[head.len()..];
+            }
+            continue;
+        }
+        if line.is_empty() {
+            line = word.to_string();
+            line_width = word_width;
+            continue;
+        }
+        if line_width + 1 + word_width <= columns {
+            line.push(' ');
+            line.push_str(word);
+            line_width += 1 + word_width;
+            continue;
+        }
+        lines.push(std::mem::take(&mut line));
+        line = word.to_string();
+        line_width = word_width;
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
+pub fn notice_lines(text: &str, columns: usize) -> Vec<String> {
+    let text = text.trim();
+    if text.is_empty() || columns == 0 {
+        return Vec::new();
+    }
+    let words: Vec<&str> = text.split_whitespace().collect();
+    if words.len() >= 2 {
+        let mut best: Option<(usize, usize)> = None;
+        for index in 1..words.len() {
+            let left = words[..index].join(" ");
+            let right = words[index..].join(" ");
+            let left_width = display_width(&left);
+            let right_width = display_width(&right);
+            if left_width > columns || right_width > columns {
+                continue;
+            }
+            let diff = left_width.abs_diff(right_width);
+            if best.map(|(_, best_diff)| diff < best_diff).unwrap_or(true) {
+                best = Some((index, diff));
+            }
+        }
+        if let Some((index, _)) = best {
+            return vec![words[..index].join(" "), words[index..].join(" ")];
+        }
+    }
+    wrap_columns(text, columns)
+}
+
+fn notice_pages(messages: &[String], columns: usize) -> Vec<Vec<String>> {
+    let mut pages = Vec::new();
+    for message in messages {
+        let lines = notice_lines(message, columns);
+        if lines.is_empty() {
+            continue;
+        }
+        for chunk in lines.chunks(NOTICE_ROWS) {
+            let mut page = chunk.to_vec();
+            while page.len() < NOTICE_ROWS {
+                page.push(String::new());
+            }
+            pages.push(page);
+        }
+    }
+    pages
 }
 
 fn clock_now() -> String {

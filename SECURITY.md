@@ -4,9 +4,10 @@
 
 | Version | Supported |
 |---------|-----------|
-| 1.2.0 (current Rust crate `rustagent`) | Yes |
+| 1.2.1 (current Rust crate `rustagent`) | Yes |
+| 1.2.0 | Yes |
 
-Older numbered sections in `CHANGELOG.md` record the POSIX `grok-cli` history that this git tree still contains. They are not RustAgent releases. Report defects in `rust-agent` **1.2.0** against this repository.
+Older numbered sections in `CHANGELOG.md` record the POSIX `grok-cli` history that this git tree still contains. They are not RustAgent releases. Report defects in `rust-agent` **1.2.1** against this repository.
 
 ## Reporting a Vulnerability
 

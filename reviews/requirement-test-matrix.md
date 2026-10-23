@@ -1,7 +1,7 @@
 # Requirement ↔ test matrix — AgentCli
 
 **Updated:** 2026-10-22. Python ship unit **1.2.0**. Suite `tests/run_python.sh` (60 tests OK). POSIX reference suite remains `tests/run.sh` against `src/grok-cli` **1.8.47**.  
-**Rust ship unit (2026-10-22):** `requirement-rust-tui`, `requirement-rust-cli-interface`, `requirement-rust-cli-language`, `requirement-rust-about`, `requirement-rust-readme`, `requirement-rust-packaging`, `requirement-domain-grok-cli`, `requirement-grok-auth-backup`, `requirement-grok-setup`, `requirement-grok-crontab`, `requirement-shell-startup-files` → `tests/contract.rs`, `tests/domain.rs`, `tests/startup.rs`, `tests/docs.rs`. Product proof is `cargo test --offline -- --test-threads=1`. Python unit tests are removed with `src/AgentCli`. `tests/run.sh` remains the POSIX reference against `src/grok-cli`.
+**Rust ship unit (2026-10-23):** crate `rustagent` **1.2.1**. Language codes **70**–**82** inside band **70**–**98**. Unavailable sentences use a two-row notice that advances on the clock second. `requirement-rust-tui`, `requirement-rust-cli-interface`, `requirement-rust-cli-language`, `requirement-rust-about`, `requirement-rust-readme`, `requirement-rust-packaging`, `requirement-domain-grok-cli`, `requirement-grok-auth-backup`, `requirement-grok-setup`, `requirement-grok-crontab`, `requirement-shell-startup-files` → `tests/contract.rs`, `tests/domain.rs`, `tests/startup.rs`, `tests/docs.rs`. Product proof is `cargo test --offline -- --test-threads=1`. Python unit tests are removed with `src/AgentCli`. `tests/run.sh` remains the POSIX reference against `src/grok-cli`. POSIX menu language stays **80**–**92**.
 
 **Product VERSION (shell reference):** 1.8.47  
 **Shell suite:** `tests/run.sh`

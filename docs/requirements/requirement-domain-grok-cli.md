@@ -1,10 +1,10 @@
 **file**: docs/requirements/requirement-domain-grok-cli.md  
-**Status**: Active (Version 1.10.4)  
+**Status**: Active (Version 1.10.5)  
 **Area**: domain  
 **Key**: `requirement-domain-grok-cli`  
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
-> Ship unit (2026-10-22): Rust crate **rustagent**, console binary **`rust-agent`**, display name **RustAgent**, version **1.2.0**. The product was renamed from AgentCli, which was renamed from grok-cli. Where this file names the product command `grok-cli` or `agent-cli`, the console binary is `rust-agent`. The deposit directory is `/var/rust-agent`. Peer binary remains `grok`. Auth files remain under `~/.grok`. Behavioral MUST rules below stay. Empty argv on a terminal opens the text menu and does not run cargo and does not download grok. Empty argv with no terminal prints help and returns 0. Package install is cargo (`cargo install rustagent`, `cargo install rustagent --force`, `cargo uninstall rustagent`). This file does not run a vendor shell installer. The live menu picture is `requirement-rust-tui`: front row **3** is system-log, self-management rows are **62**–**68**, and language codes stay **80**–**92**. The POSIX file `src/grok-cli` keeps its own menu numbers. Do not open a second Active domain file for that menu delta.
+> Ship unit (2026-10-23): Rust crate **rustagent**, console binary **`rust-agent`**, display name **RustAgent**, version **1.2.1**. The product was renamed from AgentCli, which was renamed from grok-cli. Where this file names the product command `grok-cli` or `agent-cli`, the console binary is `rust-agent`. The deposit directory is `/var/rust-agent`. Peer binary remains `grok`. Auth files remain under `~/.grok`. Behavioral MUST rules below stay. Empty argv on a terminal opens the text menu and does not run cargo and does not download grok. Empty argv with no terminal prints help and returns 0. Package install is cargo (`cargo install rustagent`, `cargo install rustagent --force`, `cargo uninstall rustagent`). This file does not run a vendor shell installer. The live menu picture is `requirement-rust-tui`: front row **3** is system-log, self-management rows are **62**–**68**, and language codes are **70**–**82** inside band **70**–**98**. Unavailable sentences use a two-row notice that advances when the clock second changes. The POSIX file `src/grok-cli` keeps its own menu numbers. Do not open a second Active domain file for that menu delta.
 
 ## 1. Purpose
 
@@ -310,6 +310,7 @@ Detect: Termux — `uname` contains Android, or `PREFIX` / `TERMUX_VERSION` is s
 | 2026-10-10 | Active (1.10.2) | `sync-auth-to-remote` is not a numbered row; this-login-only omits auth **11** and **13** and lists **12** only when logged out (default-interaction **2.25.0**) |
 | 2026-10-10 | Active (1.10.3) | Logged-out not-available line follows default-interaction **2.26.0** |
 | 2026-10-12 | Active (1.10.4) | This-login-only start list follows default-interaction **2.27.0** (**1** grok-auth, **2** run, **6** self-management, **7** language, **9** Exit) |
+| 2026-10-23 | Active (1.10.5) | Live RustAgent language codes are **70**–**82** inside band **70**–**98**. Product version is **1.2.1**. Unavailable sentences use a two-row notice. `src/grok-cli` keeps its own menu numbers |
 
 ---
 
@@ -334,6 +335,6 @@ Detect: Termux — `uname` contains Android, or `PREFIX` / `TERMUX_VERSION` is s
 **Matrix:** `reviews/requirement-test-matrix.md`  
 **Map:** `reviews/test-plan.md`.
 
-**Last Updated**: 2026-10-12 (1.10.4 — this-login-only start list follows default-interaction **2.27.0**. 1.10.3 followed **2.26.0**.)  
+**Last Updated**: 2026-10-23 (1.10.5 — live RustAgent language codes are **70**–**82** inside band **70**–**98**. Product version is **1.2.1**. Unavailable sentences use a two-row notice. 1.10.4 followed default-interaction **2.27.0**.)  
 **Owner**: project maintainers  
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).
